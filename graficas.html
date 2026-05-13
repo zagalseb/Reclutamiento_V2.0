@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <title>Gráficas de Reclutamiento</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <!-- Menú de navegación -->
+  <header>
+    <div class="header-top">
+      <h1>Reclutamiento</h1>
+    </div>
+    <nav>
+      <a href="index.html" class="nav-link">Inicio</a>
+      <a href="graficas.html" class="nav-link active">Gráficas</a>
+      <a href="comparador.html" class="nav-link">Comparador</a>
+      <a href="bigboard.html" class="nav-link">Big Board</a>
+      <a href="roster.html" class="nav-link">Roster</a>
+      <a href="procesos.html" class="nav-link">Procesos</a>
+      <a href="tareas.html" class="nav-link">Tareas</a>
+    </nav>
+  </header>
+
+  <main style="padding: 20px;">
+    <h1 style="text-align: center; color: #004992;">Gráficas</h1>
+
+    <!-- Filtros -->
+    <section style="margin-bottom: 20px;">
+      <form id="formFiltros" style="display: flex; flex-wrap: wrap; gap: 20px; justify-content: center;">
+        <div style="flex: 1 1 45%;">
+          <label for="ejeX">Eje X:</label>
+          <select id="ejeX" required>
+            <option value="Altura">Altura</option>
+            <option value="Peso">Peso</option>
+            <option value="40 YD">40 YD</option>
+            <option value="Vertical">Vertical Jump</option>
+            <option value="3 cone">3 Cone</option>
+            <option value="Shuttle">Shuttle</option>
+            <option value="Broad">Broad Jump</option>
+            <option value="TL%">Este esta para futuras stats</option>
+          </select>
+        </div>
+        <div style="flex: 1 1 45%;">
+          <label for="ejeY">Eje Y:</label>
+          <select id="ejeY" required>
+            <option value="Altura">Altura</option>
+            <option value="Peso">Peso</option>
+            <option value="40 YD">40 YD</option>
+            <option value="Vertical">Vertical Jump</option>
+            <option value="3 cone">3 Cone</option>
+            <option value="Shuttle">Shuttle</option>
+            <option value="Broad">Broad Jump</option>
+            <option value="TL %">Este esta para futuras stats</option>
+          </select>
+        </div>
+        <div style="flex: 1 1 45%;">
+          <label for="posicion">Posición:</label>
+          <select id="posicion" required>
+            <option value="Todas">Todas</option>
+            <option value="QB">QB</option>
+            <option value="RB">RB</option>
+            <option value="FB">FB</option>
+            <option value="WR">WR</option>
+            <option value="TE">TE</option>
+            <option value="OT">OT</option>
+            <option value="OG">OG</option>
+            <option value="C">C</option>
+            <option value="Ninguna">Ninguna</option>
+          </select>
+        </div>
+        <div style="flex: 1 1 45%;">
+          <label for="posicionDefensiva">Posición Defensiva:</label>
+          <select id="posicionDefensiva" required>
+            <option value="Todas">Todas</option>
+            <option value="NT">NT</option>
+            <option value="DL">DL</option>
+            <option value="LB">LB</option>
+            <option value="CB">CB</option>
+            <option value="S">S</option>
+            <option value="Ninguna">Ninguna</option>
+          </select>
+        </div>
+        <div style="flex: 1 1 45%;">
+          <label for="estado">Estado:</label>
+          <select id="estado" required>
+            <option value="Todos">Todos</option>
+            <option value="Aguascalientes">Aguascalientes</option>
+            <option value="Baja California">Baja California</option>
+            <option value="Baja California Sur">Baja California Sur</option>
+            <option value="Campeche">Campeche</option>
+            <option value="Chiapas">Chiapas</option>
+            <option value="Chihuahua">Chihuahua</option>
+            <option value="Ciudad de México">Ciudad de México</option>
+            <option value="Coahuila">Coahuila</option>
+            <option value="Colima">Colima</option>
+            <option value="Durango">Durango</option>
+            <option value="Estado de México">Estado de México</option>
+            <option value="Guanajuato">Guanajuato</option>
+            <option value="Guerrero">Guerrero</option>
+            <option value="Hidalgo">Hidalgo</option>
+            <option value="Jalisco">Jalisco</option>
+            <option value="Michoacán">Michoacán</option>
+            <option value="Morelos">Morelos</option>
+            <option value="Nayarit">Nayarit</option>
+            <option value="Nuevo León">Nuevo León</option>
+            <option value="Oaxaca">Oaxaca</option>
+            <option value="Puebla">Puebla</option>
+            <option value="Querétaro">Querétaro</option>
+            <option value="Quintana Roo">Quintana Roo</option>
+            <option value="San Luis Potosí">San Luis Potosí</option>
+            <option value="Sinaloa">Sinaloa</option>
+            <option value="Sonora">Sonora</option>
+            <option value="Tabasco">Tabasco</option>
+            <option value="Tamaulipas">Tamaulipas</option>
+            <option value="Tlaxcala">Tlaxcala</option>
+            <option value="Veracruz">Veracruz</option>
+            <option value="Yucatán">Yucatán</option>
+            <option value="Zacatecas">Zacatecas</option>
+          </select>
+        </div>
+        
+        <button type="submit" style="flex: 1 1 100%; background-color: #007bff; color: white; padding: 10px; border: none; border-radius: 5px; cursor: pointer;">
+          Comparar
+        </button>
+      </form>
+    </section>
+
+    <!-- Contenedor para la gráfica -->
+    <div style="width: 800px; margin: auto;">
+      <canvas id="grafica"></canvas>
+    </div>
+  </main>
+
+  <footer style="background-color: #004992; color: white; text-align: center; padding: 10px; margin-top: 20px;">
+    &copy; 2024 Reclutamiento Deportivo. Todos los derechos reservados.
+  </footer>
+
+  <script src="graficas.js"></script> <!-- Archivo JS específico -->
+</body>
+</html>
+

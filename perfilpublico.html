@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Perfil Público</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      background-color: #f0f0f0;
+      color: #333;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+    }
+    header {
+      background-color: #900 !important; /* Rojo */
+      color: white; /* Letras blancas */
+      padding: 15px; /* Espaciado alrededor */
+      text-align: center; /* Centrar contenido */
+    }
+
+    header h1 {
+      color: white; /* Asegurar que el título sea blanco */
+    }
+
+    header a {
+      color: white !important; /* Forzar color blanco en enlaces */
+      text-decoration: none;
+    }
+
+    header a:hover {
+      text-decoration: underline; /* Subrayado al pasar el mouse */
+    }
+
+#cerrar-sesion {
+  background-color: white;
+  color: red;
+  border: none;
+  padding: 10px 15px;
+  cursor: pointer;
+  font-weight: bold;
+  border-radius: 5px;
+}
+
+#cerrar-sesion:hover {
+  background-color: #ffcccc; /* Color más claro al pasar el mouse */
+}
+
+    /* Encabezado con el nombre e imagen */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+    .header img {
+      width: 180px;
+      height: 220px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+    .player-info {
+      flex: 1;
+      margin-left: 20px;
+    }
+    .player-info h1 {
+      font-size: 2.2rem;
+      color: #c00; /* Rojo */
+      margin-bottom: 10px;
+      text-align: left;
+      font-weight: bold;
+    }
+    .position-stats {
+      padding: 10px;
+      border-radius: 8px;
+      display: inline-block;
+      margin-top: 10px;
+      font-size: 1.4rem;
+      color: #000000;
+      font-weight: bold;
+    }
+    /* Cuadros de información */
+    .info-rating-container {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+    /* === INFO BOX === */
+    .info-box {
+      border: 2px solid #000;
+      border-radius: 8px;
+      width: 350px;
+      min-height: 100px;
+      padding: 10px;
+      /* Alineamos el contenido a la izquierda */
+      text-align: left;
+      font-weight: bold;
+    }
+    .info-box h2 {
+      color: #c00;
+      margin-bottom: 10px;
+      text-align: center; /* Encabezado centrado */
+    }
+    .info-box p strong {
+      color: #920b0b; /* Rojo fuerte */
+      font-size: 1rem;
+      font-weight: bold;
+    }
+    .info-box span {
+      font-size: 1rem;
+      color: #000000; /* Gris oscuro */
+    }
+    .info-box p {
+      margin: 8px 0;
+      line-height: 1.4;
+    }
+    /* Para que "Ciudad" y "Clase" queden en la misma fila, usamos flex */
+    .city-class-row {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 8px;
+    }
+    .city-class-row p {
+      margin: 0; /* Ajuste para que no se separen demasiado */
+    }
+
+    /* === RATING BOX === */
+    .rating-box {
+      border: 2px solid #000;
+      border-radius: 8px;
+      width: 350px;
+      min-height: 150px;
+      padding: 10px;
+      text-align: center;
+      font-weight: bold;
+    }
+    .rating-box h2 {
+      color: #c00;
+      margin-bottom: 10px;
+    }
+    /* Estrellas grandes y doradas */
+    .stars {
+      font-size: 2.2rem;
+      color: gold;
+      margin-right: 10px;
+    }
+    /* Número de rating grande */
+    .rating-number {
+      font-size: 2.4rem;
+      color: #000000;
+      font-weight: bold;
+    }
+    /* Contenedor para estrellas + número en una sola línea */
+    .star-rating-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    /* Detalles de rating (NAT, STA, POS) */
+    .rating-details {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 10px;
+      font-size: 1.2rem;
+    }
+    .rating-details div {
+      text-align: center;
+    }
+
+    /* Botones de highlights */
+    .highlights-container {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
+      gap: 20px;
+    }
+    .highlight-btn {
+      background-color: rgb(0, 0, 0) !important;
+      color: #fff;
+      border: none;
+      padding: 15px 20px;
+      cursor: pointer;
+      font-size: 1rem;
+      border-radius: 8px;
+      transition: background-color 0.3s;
+    }
+    .highlight-btn:hover {
+      background-color: #900 !important; 
+    }
+  </style>
+</head>
+<body>
+        
+  <header>
+    <h1>Base de datos Reclutamiento</h1>
+    <button id="cerrar-sesion">Cerrar Sesión</button>
+    <nav style="display: flex; justify-content: space-between; align-items: center;">
+      <div style="display: flex; gap: 20px;">
+        <a href="index.html">Inicio</a>
+        <a href="graficas.html">Gráficas</a>
+        <a href="comparador.html">Comparador</a>
+        <a href="bigboard.html">Big Board</a>
+        <a href="roster.html">Roster</a>
+        <a href="ranking.html">Ranking</a>
+      </div>
+    </nav>
+</header>
+
+
+  <div class="container">
+    <!-- Encabezado con foto y nombre -->
+    <div class="header">
+      <img id="playerPhoto" src="" alt="Foto del Jugador" />
+      <div class="player-info">
+        <h1 id="playerName"></h1>
+        <div class="position-stats">
+          <div id="playerPosition"></div>
+          <div id="playerHeightWeight"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contenedores de información y rating -->
+    <div class="info-rating-container">
+      <!-- INFO BOX -->
+      <div class="info-box">
+        <h2>INFO</h2>
+        <p>
+          <strong>Equipo/Club</strong><br>
+          <span id="playerTeam"></span>
+        </p>
+        <!-- Ciudad y Clase en la misma fila -->
+        <div class="city-class-row">
+          <p>
+            <strong>Ciudad</strong><br>
+            <span id="playerCity"></span>
+          </p>
+          <p>
+            <strong>Clase</strong><br>
+            <span id="playerClass"></span>
+          </p>
+        </div>
+      </div>
+
+      <!-- RATING BOX -->
+      <div class="rating-box">
+        <h2>RATING</h2>
+        <!-- Estrellas y número en una sola fila -->
+        <div class="star-rating-container">
+          <span class="stars" id="playerStars">&#9733; &#9733; &#9733; &#9733; &#9733;</span>
+          <span class="rating-number" id="playerRating">98</span>
+        </div>
+        <div class="rating-details">
+          <div>
+            <div id="playerNat">1</div>
+            <small>NAT.</small>
+          </div>
+          <div>
+            <div id="playerSta">1</div>
+            <small>STA.</small>
+          </div>
+          <div>
+            <div id="playerPos">1</div>
+            <small>POS.</small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Botones de highlights -->
+    <div class="highlights-container">
+      <button class="highlight-btn" id="highlightBtn1">Highlights 1</button>
+      <button class="highlight-btn" id="highlightBtn2">Highlights 2</button>
+      <button class="highlight-btn" id="highlightBtn3">Highlights 3</button>
+    </div>
+  </div>
+
+  <!-- Script con los datos -->
+  <script src="perfilpublico.js"></script>
+</body>
+</html>

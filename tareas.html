@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="es">
+<script>
+  if (!localStorage.getItem("sesionIniciada")) {
+    window.location.href = "login.html";
+  }
+</script>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <title>Tareas – Reclutamiento</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    /* ── Variables ── */
+    :root {
+      --navy:   #0b3a70;
+      --red:    #8B0000;
+      --gold:   #c8a200;
+      --light:  #f0f4fa;
+      --white:  #ffffff;
+      --border: rgba(11,58,112,0.15);
+      --shadow: 0 2px 12px rgba(11,58,112,0.10);
+    }
+
+    /* ── Reset extras ── */
+    *, *::before, *::after { box-sizing: border-box; }
+
+    /* ── Layout ── */
+    .tareas-wrap {
+      max-width: 1100px;
+      margin: 28px auto;
+      padding: 0 18px 60px;
+    }
+
+    /* ── Hero strip ── */
+    .hero-strip {
+      background: linear-gradient(135deg, var(--navy) 0%, #1a5276 100%);
+      border-radius: 14px;
+      padding: 26px 30px 22px;
+      margin-bottom: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 14px;
+      box-shadow: 0 6px 24px rgba(11,58,112,0.25);
+    }
+    .hero-strip h2 {
+      font-family: 'Oswald', sans-serif;
+      font-size: 1.7rem;
+      color: var(--white);
+      margin: 0;
+      text-align: left;
+      letter-spacing: .5px;
+    }
+    .hero-strip p {
+      color: rgba(255,255,255,.65);
+      margin: 4px 0 0;
+      font-size: .85rem;
+      font-family: 'Inter', sans-serif;
+    }
+    .hero-kpis {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    .kpi {
+      background: rgba(255,255,255,.10);
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: 10px;
+      padding: 10px 18px;
+      text-align: center;
+      min-width: 80px;
+    }
+    .kpi-num {
+      font-family: 'Oswald', sans-serif;
+      font-size: 1.6rem;
+      color: var(--white);
+      line-height: 1;
+    }
+    .kpi-label {
+      font-size: .7rem;
+      color: rgba(255,255,255,.6);
+      margin-top: 4px;
+      font-family: 'Inter', sans-serif;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+    }
+    .kpi.urgente .kpi-num { color: #ff6b6b; }
+    .kpi.hoy .kpi-num    { color: var(--gold); }
+    .kpi.ok .kpi-num     { color: #52d67a; }
+
+    /* ── Controls bar ── */
+    .controls-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+    .controls-bar input[type="text"],
+    .controls-bar select {
+      font-family: 'Inter', sans-serif;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 13px;
+      font-size: .88rem;
+      color: var(--navy);
+      background: var(--white);
+      outline: none;
+      transition: border-color .2s;
+    }
+    .controls-bar input[type="text"]:focus,
+    .controls-bar select:focus {
+      border-color: var(--navy);
+    }
+    .controls-bar input[type="text"] { width: 200px; }
+    .btn-add {
+      font-family: 'Oswald', sans-serif;
+      background: var(--red);
+      color: var(--white);
+      border: none;
+      border-radius: 8px;
+      padding: 9px 20px;
+      font-size: .95rem;
+      cursor: pointer;
+      letter-spacing: .5px;
+      transition: background .2s;
+      margin-left: auto;
+    }
+    .btn-add:hover { background: #a00000; }
+
+    /* ── Sections ── */
+    .section-title {
+      font-family: 'Oswald', sans-serif;
+      font-size: 1rem;
+      color: var(--navy);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 0 0 8px;
+      border-bottom: 2px solid var(--border);
+      margin: 0 0 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .section-title .badge-count {
+      background: var(--navy);
+      color: white;
+      font-size: .7rem;
+      border-radius: 20px;
+      padding: 2px 9px;
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+    }
+    .section-title .badge-count.red { background: var(--red); }
+    .section-title .badge-count.gold { background: var(--gold); color: #333; }
+
+    .section-block { margin-bottom: 32px; }
+
+    /* ── Task card ── */
+    .task-list { display: flex; flex-direction: column; gap: 10px; }
+
+    .task-card {
+      background: var(--white);
+      border-radius: 10px;
+      border-left: 5px solid var(--navy);
+      box-shadow: var(--shadow);
+      padding: 14px 18px;
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      transition: transform .15s, box-shadow .15s;
+      animation: slideIn .22s ease;
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .task-card:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(11,58,112,0.14); }
+    .task-card.urgente { border-left-color: #c0392b; }
+    .task-card.hoy     { border-left-color: var(--gold); }
+    .task-card.normal  { border-left-color: var(--navy); }
+    .task-card.done    { border-left-color: #52d67a; opacity: .65; }
+
+    .task-check {
+      width: 20px; height: 20px;
+      border: 2px solid #aabccc;
+      border-radius: 50%;
+      cursor: pointer;
+      flex-shrink: 0;
+      margin-top: 2px;
+      transition: background .2s, border-color .2s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .task-check:hover { border-color: var(--navy); }
+    .task-card.done .task-check {
+      background: #52d67a; border-color: #52d67a;
+    }
+    .task-check-mark { display: none; color: white; font-size: 12px; }
+    .task-card.done .task-check-mark { display: block; }
+
+    .task-body { flex: 1; min-width: 0; }
+    .task-title {
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+      font-size: .95rem;
+      color: var(--navy);
+      margin: 0 0 4px;
+    }
+    .task-card.done .task-title { text-decoration: line-through; color: #888; }
+    .task-meta {
+      display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+    }
+    .task-tag {
+      font-size: .72rem;
+      font-family: 'Inter', sans-serif;
+      padding: 2px 9px;
+      border-radius: 20px;
+      font-weight: 500;
+    }
+    .tag-jugador  { background: #e8f0fb; color: var(--navy); }
+    .tag-etapa    { background: #f0e8fb; color: #5b2180; }
+    .tag-prioridad-A { background: #fde8e8; color: #8B0000; }
+    .tag-prioridad-B { background: #fef3e0; color: #7a5c00; }
+    .tag-prioridad-C { background: #e8f8ed; color: #1a5e2a; }
+    .task-date {
+      font-size: .72rem;
+      color: #888;
+      font-family: 'Inter', sans-serif;
+      margin-left: auto;
+    }
+    .task-date.vencida { color: #c0392b; font-weight: 600; }
+    .task-date.hoy     { color: #b38000; font-weight: 600; }
+
+    .task-actions { display: flex; gap: 6px; flex-shrink: 0; }
+    .btn-icon {
+      background: none; border: 1.5px solid var(--border);
+      border-radius: 6px; width: 30px; height: 30px;
+      cursor: pointer; font-size: 14px; color: #666;
+      display: flex; align-items: center; justify-content: center;
+      transition: background .15s, border-color .15s;
+    }
+    .btn-icon:hover { background: var(--light); border-color: var(--navy); color: var(--navy); }
+    .btn-icon.del:hover { background: #fde8e8; border-color: var(--red); color: var(--red); }
+
+    /* ── Empty state ── */
+    .empty-state {
+      text-align: center; padding: 36px 20px;
+      color: #aaa; font-family: 'Inter', sans-serif; font-size: .9rem;
+    }
+    .empty-state .icon { font-size: 2.5rem; margin-bottom: 10px; }
+
+    /* ── Modal ── */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.45); z-index: 1000;
+      display: flex; align-items: center; justify-content: center;
+      padding: 20px;
+      opacity: 0; pointer-events: none; transition: opacity .2s;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+    .modal {
+      background: var(--white); border-radius: 14px;
+      padding: 28px 30px; width: 100%; max-width: 480px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.3);
+      transform: translateY(20px); transition: transform .2s;
+    }
+    .modal-overlay.open .modal { transform: translateY(0); }
+    .modal h3 {
+      font-family: 'Oswald', sans-serif; font-size: 1.3rem;
+      color: var(--navy); margin: 0 0 20px;
+    }
+    .form-group { margin-bottom: 16px; }
+    .form-group label {
+      display: block; font-size: .8rem; font-weight: 600;
+      color: var(--navy); margin-bottom: 5px; font-family: 'Inter', sans-serif;
+      text-transform: uppercase; letter-spacing: .5px;
+    }
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%; font-family: 'Inter', sans-serif;
+      border: 1.5px solid var(--border); border-radius: 8px;
+      padding: 9px 13px; font-size: .9rem; color: var(--navy);
+      background: var(--white); outline: none; transition: border-color .2s;
+    }
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus { border-color: var(--navy); }
+    .form-group textarea { resize: vertical; min-height: 70px; }
+    .form-row { display: flex; gap: 12px; }
+    .form-row .form-group { flex: 1; }
+    .modal-actions {
+      display: flex; gap: 10px; justify-content: flex-end; margin-top: 22px;
+    }
+    .btn-cancel {
+      background: none; border: 1.5px solid var(--border); border-radius: 8px;
+      padding: 9px 20px; font-family: 'Oswald', sans-serif;
+      font-size: .95rem; color: #666; cursor: pointer; transition: all .2s;
+    }
+    .btn-cancel:hover { border-color: #888; }
+    .btn-save {
+      background: var(--navy); color: var(--white); border: none;
+      border-radius: 8px; padding: 9px 24px; font-family: 'Oswald', sans-serif;
+      font-size: .95rem; cursor: pointer; transition: background .2s;
+    }
+    .btn-save:hover { background: #0d4c8a; }
+
+    /* ── Alerts banner ── */
+    .alert-banner {
+      background: linear-gradient(90deg, #8B0000, #a00000);
+      color: white; border-radius: 10px;
+      padding: 13px 18px; margin-bottom: 20px;
+      display: flex; align-items: center; gap: 12px;
+      font-family: 'Inter', sans-serif; font-size: .88rem;
+      box-shadow: 0 4px 14px rgba(139,0,0,.3);
+      animation: slideIn .3s ease;
+    }
+    .alert-banner .icon { font-size: 1.2rem; }
+    .alert-banner a { color: #ffcdd2; text-decoration: underline; cursor: pointer; }
+    .alert-banner.hidden { display: none; }
+
+    /* ── No prospectos sin contacto section ── */
+    .sin-contacto-card {
+      background: var(--white); border-radius: 10px;
+      border-left: 5px solid var(--gold);
+      box-shadow: var(--shadow); padding: 14px 18px;
+      display: flex; align-items: center; gap: 14px;
+      margin-bottom: 10px; cursor: pointer;
+      transition: transform .15s;
+      text-decoration: none;
+    }
+    .sin-contacto-card:hover { transform: translateX(4px); }
+    .sin-contacto-card .avatar {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--navy), #1a5276);
+      display: flex; align-items: center; justify-content: center;
+      color: white; font-family: 'Oswald', sans-serif;
+      font-size: 1rem; flex-shrink: 0;
+    }
+    .sin-contacto-card .info { flex: 1; }
+    .sin-contacto-card .sc-name {
+      font-family: 'Inter', sans-serif; font-weight: 600;
+      color: var(--navy); font-size: .92rem;
+    }
+    .sin-contacto-card .sc-meta {
+      font-size: .76rem; color: #888; margin-top: 2px;
+    }
+    .sin-contacto-card .sc-days {
+      font-family: 'Oswald', sans-serif; font-size: 1.1rem;
+      color: var(--gold); text-align: right;
+    }
+    .sc-days span { font-size: .65rem; display: block; color: #aaa; font-family: 'Inter', sans-serif; }
+
+    /* ── View toggle ── */
+    .view-toggle { display: flex; gap: 6px; }
+    .view-btn {
+      background: var(--white); border: 1.5px solid var(--border);
+      border-radius: 7px; padding: 7px 14px;
+      font-family: 'Inter', sans-serif; font-size: .82rem;
+      cursor: pointer; color: #666; transition: all .15s;
+    }
+    .view-btn.active {
+      background: var(--navy); color: white; border-color: var(--navy);
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 600px) {
+      .hero-strip { flex-direction: column; }
+      .controls-bar input[type="text"] { width: 100%; }
+      .form-row { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-top">
+      <h1>Reclutamiento</h1>
+      <button id="cerrar-sesion">Cerrar sesión</button>
+    </div>
+    <nav>
+      <a href="index.html" class="nav-link">Inicio</a>
+      <a href="prospectos.html" class="nav-link">Prospectos</a>
+      <a href="bigboard.html" class="nav-link">Big Board</a>
+      <a href="roster.html" class="nav-link">Roster</a>
+      <a href="procesos.html" class="nav-link">Procesos</a>
+      <a href="tareas.html" class="nav-link active">Tareas</a>
+    </nav>
+  </header>
+
+  <!-- Alert banner para vencidas -->
+  <div class="tareas-wrap">
+    <div id="alert-banner" class="alert-banner hidden">
+      <span class="icon">⚠️</span>
+      <span id="alert-text"></span>
+    </div>
+
+    <!-- Hero strip con KPIs -->
+    <div class="hero-strip">
+      <div>
+        <h2>🗂️ Panel de Tareas</h2>
+        <p>Seguimiento de pendientes por prospecto</p>
+      </div>
+      <div class="hero-kpis">
+        <div class="kpi urgente">
+          <div class="kpi-num" id="kpi-vencidas">0</div>
+          <div class="kpi-label">Vencidas</div>
+        </div>
+        <div class="kpi hoy">
+          <div class="kpi-num" id="kpi-hoy">0</div>
+          <div class="kpi-label">Hoy</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-num" id="kpi-proximas">0</div>
+          <div class="kpi-label">Esta semana</div>
+        </div>
+        <div class="kpi ok">
+          <div class="kpi-num" id="kpi-completadas">0</div>
+          <div class="kpi-label">Hechas</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="controls-bar">
+      <input type="text" id="search-tareas" placeholder="🔍 Buscar tarea o jugador…" oninput="renderAll()">
+      <select id="filter-prioridad" onchange="renderAll()">
+        <option value="">Todas las prioridades</option>
+        <option value="A">🔴 Prioridad A</option>
+        <option value="B">🟡 Prioridad B</option>
+        <option value="C">🟢 Prioridad C</option>
+      </select>
+      <select id="filter-estado" onchange="renderAll()">
+        <option value="pendiente">Pendientes</option>
+        <option value="completada">Completadas</option>
+        <option value="todas">Todas</option>
+      </select>
+      <div class="view-toggle">
+        <button class="view-btn active" id="btn-vista-tareas"  onclick="setVista('tareas')">Tareas</button>
+        <button class="view-btn"        id="btn-vista-alertas" onclick="setVista('alertas')">Sin contacto</button>
+      </div>
+      <button class="btn-add" onclick="abrirModal()">+ Nueva tarea</button>
+    </div>
+
+    <!-- ============ VISTA: TAREAS ============ -->
+    <div id="vista-tareas">
+      <!-- Vencidas -->
+      <div class="section-block" id="block-vencidas">
+        <div class="section-title">
+          ⚠️ Vencidas
+          <span class="badge-count red" id="cnt-vencidas">0</span>
+        </div>
+        <div class="task-list" id="list-vencidas"></div>
+      </div>
+
+      <!-- Hoy -->
+      <div class="section-block" id="block-hoy">
+        <div class="section-title">
+          📅 Para hoy
+          <span class="badge-count gold" id="cnt-hoy">0</span>
+        </div>
+        <div class="task-list" id="list-hoy"></div>
+      </div>
+
+      <!-- Esta semana -->
+      <div class="section-block" id="block-semana">
+        <div class="section-title">
+          📆 Esta semana
+          <span class="badge-count" id="cnt-semana">0</span>
+        </div>
+        <div class="task-list" id="list-semana"></div>
+      </div>
+
+      <!-- Más adelante -->
+      <div class="section-block" id="block-despues">
+        <div class="section-title">
+          🗓️ Más adelante
+          <span class="badge-count" id="cnt-despues">0</span>
+        </div>
+        <div class="task-list" id="list-despues"></div>
+      </div>
+
+      <!-- Sin fecha -->
+      <div class="section-block" id="block-sinfecha">
+        <div class="section-title">
+          📌 Sin fecha
+          <span class="badge-count" id="cnt-sinfecha">0</span>
+        </div>
+        <div class="task-list" id="list-sinfecha"></div>
+      </div>
+    </div>
+
+    <!-- ============ VISTA: SIN CONTACTO ============ -->
+    <div id="vista-alertas" style="display:none;">
+      <div class="section-block">
+        <div class="section-title">
+          🔔 Prospectos sin actualización reciente
+          <span class="badge-count red" id="cnt-sincontacto">0</span>
+        </div>
+        <div id="list-sincontacto"></div>
+        <div id="empty-sincontacto" class="empty-state hidden">
+          <div class="icon">✅</div>
+          <div>Todos los prospectos tienen actividad reciente</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ MODAL ============ -->
+  <div class="modal-overlay" id="modal-overlay" onclick="cerrarModalSiOverlay(event)">
+    <div class="modal">
+      <h3 id="modal-titulo">Nueva tarea</h3>
+      <div class="form-group">
+        <label>Título de la tarea *</label>
+        <input type="text" id="f-titulo" placeholder="Ej: Llamar al prospecto para confirmar tryout">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Jugador (opcional)</label>
+          <input type="text" id="f-jugador" placeholder="Nombre completo" list="jugadores-list">
+          <datalist id="jugadores-list"></datalist>
+        </div>
+        <div class="form-group">
+          <label>Etapa</label>
+          <select id="f-etapa">
+            <option value="">— Sin etapa —</option>
+            <option>Nuevo</option>
+            <option>Evaluando</option>
+            <option>Contactado</option>
+            <option>Interesado</option>
+            <option>Tryout / Visita</option>
+            <option>Oferta</option>
+            <option>Admitido</option>
+            <option>No interesado</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Fecha límite</label>
+          <input type="date" id="f-fecha">
+        </div>
+        <div class="form-group">
+          <label>Prioridad</label>
+          <select id="f-prioridad">
+            <option value="B">B – Normal</option>
+            <option value="A">A – Alta</option>
+            <option value="C">C – Baja</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Notas</label>
+        <textarea id="f-notas" placeholder="Detalles adicionales…"></textarea>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="cerrarModal()">Cancelar</button>
+        <button class="btn-save"   onclick="guardarTarea()">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>&copy; 2025 Base de datos de Reclutamiento. Todos los derechos reservados.</p>
+  </footer>
+
+  <!-- Cierre de sesión reutilizable -->
+  <script>
+    document.getElementById("cerrar-sesion")?.addEventListener("click", () => {
+      localStorage.removeItem("sesionIniciada");
+      window.location.href = "login.html";
+    });
+  </script>
+  <script src="tareas.js"></script>
+</body>
+</html>

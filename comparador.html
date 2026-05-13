@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <title>Comparador de Jugadores</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <header>
+    <div class="header-top">
+      <h1>Reclutamiento</h1>
+    </div>
+    <nav>
+      <a href="index.html" class="nav-link">Inicio</a>
+      <a href="graficas.html" class="nav-link">Gráficas</a>
+      <a href="comparador.html" class="nav-link active">Comparador</a>
+      <a href="bigboard.html" class="nav-link">Big Board</a>
+      <a href="roster.html" class="nav-link">Roster</a>
+      <a href="procesos.html" class="nav-link">Procesos</a>
+      <a href="tareas.html" class="nav-link">Tareas</a>
+    </nav>
+  </header>
+
+  <main>
+
+    <section id="filtros">
+        <h3>Filtrar Jugadores</h3>
+        <div>
+          <label for="filtroEstado">Estado:</label>
+          <select id="filtroEstado">
+            <option value="Todos">Todos</option>
+            <option value="Aguascalientes">Aguascalientes</option>
+            <option value="Baja California">Baja California</option>
+            <option value="Baja California Sur">Baja California Sur</option>
+            <option value="Campeche">Campeche</option>
+            <option value="Chiapas">Chiapas</option>
+            <option value="Chihuahua">Chihuahua</option>
+            <option value="Ciudad de México">Ciudad de México</option>
+            <option value="Coahuila">Coahuila</option>
+            <option value="Colima">Colima</option>
+            <option value="Durango">Durango</option>
+            <option value="Estado de México">Estado de México</option>
+            <option value="Guanajuato">Guanajuato</option>
+            <option value="Guerrero">Guerrero</option>
+            <option value="Hidalgo">Hidalgo</option>
+            <option value="Jalisco">Jalisco</option>
+            <option value="Michoacán">Michoacán</option>
+            <option value="Morelos">Morelos</option>
+            <option value="Nayarit">Nayarit</option>
+            <option value="Nuevo León">Nuevo León</option>
+            <option value="Oaxaca">Oaxaca</option>
+            <option value="Puebla">Puebla</option>
+            <option value="Querétaro">Querétaro</option>
+            <option value="Quintana Roo">Quintana Roo</option>
+            <option value="San Luis Potosí">San Luis Potosí</option>
+            <option value="Sinaloa">Sinaloa</option>
+            <option value="Sonora">Sonora</option>
+            <option value="Tabasco">Tabasco</option>
+            <option value="Tamaulipas">Tamaulipas</option>
+            <option value="Tlaxcala">Tlaxcala</option>
+            <option value="Veracruz">Veracruz</option>
+            <option value="Yucatán">Yucatán</option>
+            <option value="Zacatecas">Zacatecas</option>
+          </select>
+        </div>
+        <div>
+          <label for="filtroOfensiva">Posición Ofensiva:</label>
+          <select id="filtroOfensiva">
+            <option value="">Todas</option>
+            <option value="QB">QB</option>
+            <option value="RB">RB</option>
+            <option value="FB">FB</option>
+            <option value="WR">WR</option>
+            <option value="TE">TE</option>
+            <option value="OT">OT</option>
+            <option value="OG">OG</option>
+            <option value="C">C</option>
+          </select>
+        </div>
+        <div>
+          <label for="filtroDefensiva">Posición Defensiva:</label>
+          <select id="filtroDefensiva">
+            <option value="">Todas</option>
+            <option value="NT">NT</option>
+            <option value="DL">DL</option>
+            <option value="LB">LB</option>
+            <option value="CB">CB</option>
+            <option value="S">S</option>
+            <option value="Ninguna">Ninguna</option>
+          </select>
+        </div>        
+      </section>
+    <!-- Selección de jugadores -->
+     <!-- Botón para ocultar/mostrar -->
+    <button id="toggleListaJugadores" style="margin-bottom: 10px;">Ocultar Jugadores</button>
+
+    <section id="seleccion-jugadores">
+      <h2>Selecciona Jugadores</h2>
+      <div id="lista-jugadores">
+        <!-- Lista dinámica de jugadores generada con JS -->
+      </div>
+    </section>
+
+    <!-- Comparación -->
+    <section id="comparacion">
+      <h2>Comparación de Jugadores</h2>
+      <div id="tabla-comparacion">
+        <!-- Tabla o gráficos generados dinámicamente -->
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2024 Comparador de Jugadores. Todos los derechos reservados.</p>
+  </footer>
+
+  <script src="comparador.js"></script>
+</body>
+</html>
