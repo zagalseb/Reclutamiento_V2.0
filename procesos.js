@@ -37,7 +37,7 @@
 
   async function fetchProcesos() {
     const url = `${SUPABASE_URL}/rest/v1/procesos` +
-      `?select=*,jugadores!jugador_id(nombre,apellido_paterno,apellido_materno,posicion_principal,calificacion)` +
+      `?select=*,jugadores!jugador_id(nombre,posicion,calificacion)` +
       `&order=created_at.asc`;
     const res = await fetch(url, { headers: headers() });
     if (!res.ok) throw new Error(`Supabase error ${res.status}`);
@@ -47,7 +47,7 @@
   async function fetchProcesoById(id) {
     const url = `${SUPABASE_URL}/rest/v1/procesos` +
       `?id=eq.${encodeURIComponent(id)}` +
-      `&select=*,jugadores!jugador_id(nombre,apellido_paterno,apellido_materno,posicion_principal,calificacion)` +
+      `&select=*,jugadores!jugador_id(nombre,posicion,calificacion)` +
       `&limit=1`;
     const res = await fetch(url, { headers: headers() });
     if (!res.ok) return null;
@@ -91,11 +91,11 @@
 
   async function searchJugadores(q) {
     const wildcard = `*${q}*`;
-    const orParam = `(nombre.ilike.${wildcard},apellido_paterno.ilike.${wildcard},apellido_materno.ilike.${wildcard})`;
+    const orParam = `(nombre.ilike.${wildcard})`;
     const url = `${SUPABASE_URL}/rest/v1/jugadores` +
       `?or=${encodeURIComponent(orParam)}` +
-      `&select=id,nombre,apellido_paterno,apellido_materno,posicion_principal` +
-      `&limit=20&order=apellido_paterno.asc`;
+      `&select=id,nombre,posicion` +
+      `&limit=20&order=nombre.asc`;
     const res = await fetch(url, { headers: headers() });
     if (!res.ok) return [];
     return res.json();
@@ -104,7 +104,7 @@
   // ── Helpers ────────────────────────────────────────────
 
   function fullName(j) {
-    return [j.nombre, j.apellido_paterno, j.apellido_materno].filter(Boolean).join(" ");
+    return j.nombre || "";
   }
 
   function stars(n) {
@@ -143,7 +143,7 @@
       if (q   && !fullName(jug).toLowerCase().includes(q))   return false;
       if (pri && p.prioridad !== pri)                         return false;
       if (dec && p.decision  !== dec)                         return false;
-      if (pos && (jug.posicion_principal || "") !== pos)      return false;
+      if (pos && (jug.posicion || "") !== pos)      return false;
       return true;
     });
   }
@@ -206,7 +206,7 @@
       <div class="card-name">${esc(name)}</div>
       <div class="card-meta">
         ${stars(jug.calificacion)}
-        ${jug.posicion_principal ? `<span class="card-pos">${esc(jug.posicion_principal)}</span>` : ""}
+        ${jug.posicion ? `<span class="card-pos">${esc(jug.posicion)}</span>` : ""}
       </div>
       <div class="card-badges">
         <span class="badge-pri ${esc(p.prioridad || "B")}">${esc(p.prioridad || "B")}</span>
@@ -339,7 +339,7 @@
     el.innerHTML = jugadores.map(j => `
       <div class="add-result-item" data-id="${esc(j.id)}">
         <strong>${esc(fullName(j))}</strong>
-        ${j.posicion_principal ? `<span class="card-pos">${esc(j.posicion_principal)}</span>` : ""}
+        ${j.posicion ? `<span class="card-pos">${esc(j.posicion)}</span>` : ""}
       </div>
     `).join("");
 

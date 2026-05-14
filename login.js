@@ -2,19 +2,8 @@
 // Lista de usuarios y contraseñas
 const USUARIOS = [
     { username: "admin", password: "12345" },
-    { username: "CEM", password: "SVG25" },
-    { username: "UANL", password: "TIGRES" },
-    { username: "UNAM", password: "PUMAS" },
-    { username: "GDL", password: "TEC" },
     { username: "MTY", password: "tec" },
-    { username: "HDL", password: "Tec" },
-    { username: "PUEBLA", password: "TEC" },
-    { username: "CSF", password: "SF" },
-    { username: "ANAHUAC", password: "QRO" },
-    { username: "UDLAP", password: "AZTECAS" },
-    { username: "UP", password: "CDMX" },
-    { username: "UPAEP", password: "Puebla" },
-    { username: "CETYS", password: "Mexicali" }
+    
   ];
   
 function iniciarSesion() {

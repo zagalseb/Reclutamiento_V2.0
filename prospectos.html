@@ -1,10 +1,5 @@
 <!DOCTYPE html>
 <html lang="es">
-<script>
-  if (!localStorage.getItem("sesionIniciada")) {
-    window.location.href = "login.html";
-  }
-</script>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -539,10 +534,8 @@
                 <th>#</th>
                 <th>Nombre</th>
                 <th>Posición</th>
-                <th>Clase</th>
-                <th>Ciudad</th>
                 <th>Estado</th>
-                <th>Estatura</th>
+                <th>Altura</th>
                 <th>Peso</th>
                 <th>40 yds</th>
                 <th>Calificación</th>
@@ -571,10 +564,6 @@
   </footer>
 
   <script>
-    document.getElementById("cerrar-sesion")?.addEventListener("click", () => {
-      localStorage.removeItem("sesionIniciada");
-      window.location.href = "login.html";
-    });
 
     const u = localStorage.getItem("usuarioActual") || "";
     const bienvenida = document.getElementById("bienvenida");

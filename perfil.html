@@ -1,10 +1,5 @@
 <!DOCTYPE html>
 <html lang="es">
-<script>
-  if (!localStorage.getItem("sesionIniciada")) {
-    window.location.href = "login.html";
-  }
-</script>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -402,36 +397,38 @@
       <!-- Sección 2: Datos personales -->
       <div class="info-card">
         <div class="info-card-title">Datos personales</div>
-        <div class="info-row"><span class="info-label">Ciudad</span>      <span class="info-value" id="d-ciudad">—</span></div>
         <div class="info-row"><span class="info-label">Estado</span>      <span class="info-value" id="d-estado">—</span></div>
         <div class="info-row"><span class="info-label">Teléfono</span>    <span class="info-value" id="d-telefono">—</span></div>
         <div class="info-row"><span class="info-label">Email</span>       <span class="info-value" id="d-email">—</span></div>
-        <div class="info-row"><span class="info-label">Instagram</span>   <span class="info-value" id="d-instagram">—</span></div>
-        <div class="info-row"><span class="info-label">TikTok</span>      <span class="info-value" id="d-tiktok">—</span></div>
         <div class="info-row"><span class="info-label">Nacimiento</span>  <span class="info-value" id="d-nacimiento">—</span></div>
-        <div class="info-row"><span class="info-label">Lugar nac.</span>  <span class="info-value" id="d-lugar-nac">—</span></div>
       </div>
 
       <!-- Sección 3: Datos académicos -->
       <div class="info-card">
         <div class="info-card-title">Datos académicos</div>
-        <div class="info-row"><span class="info-label">Preparatoria</span>   <span class="info-value" id="d-prepa">—</span></div>
-        <div class="info-row"><span class="info-label">Ciudad prepa</span>   <span class="info-value" id="d-ciudad-prepa">—</span></div>
-        <div class="info-row"><span class="info-label">Estado prepa</span>   <span class="info-value" id="d-estado-prepa">—</span></div>
-        <div class="info-row"><span class="info-label">Promedio</span>       <span class="info-value" id="d-promedio">—</span></div>
-        <div class="info-row"><span class="info-label">Otro idioma</span>    <span class="info-value" id="d-idioma">—</span></div>
+        <div class="info-row"><span class="info-label">Preparatoria</span>  <span class="info-value" id="d-prepa">—</span></div>
+        <div class="info-row"><span class="info-label">Promedio</span>      <span class="info-value" id="d-promedio">—</span></div>
+        <div class="info-row"><span class="info-label">Semestre</span>      <span class="info-value" id="d-semestre">—</span></div>
       </div>
 
       <!-- Sección 4: Datos atléticos -->
       <div class="info-card">
         <div class="info-card-title">Datos atléticos</div>
-        <div class="info-row"><span class="info-label">Estatura</span>        <span class="info-value" id="d-estatura">—</span></div>
-        <div class="info-row"><span class="info-label">Peso</span>            <span class="info-value" id="d-peso">—</span></div>
-        <div class="info-row"><span class="info-label">40 yardas</span>       <span class="info-value" id="d-40yds">—</span></div>
-        <div class="info-row"><span class="info-label">Salto vertical</span>  <span class="info-value" id="d-vertical">—</span></div>
-        <div class="info-row"><span class="info-label">Equipo anterior</span> <span class="info-value" id="d-equipo">—</span></div>
-        <div class="info-row"><span class="info-label">Logros</span>          <span class="info-value" id="d-logros">—</span></div>
-        <div class="info-row"><span class="info-label">Lesiones</span>        <span class="info-value" id="d-lesiones">—</span></div>
+        <div class="info-row"><span class="info-label">Posición</span>    <span class="info-value" id="d-posicion">—</span></div>
+        <div class="info-row"><span class="info-label">Altura</span>      <span class="info-value" id="d-altura">—</span></div>
+        <div class="info-row"><span class="info-label">Peso</span>        <span class="info-value" id="d-peso">—</span></div>
+        <div class="info-row"><span class="info-label">40 yardas</span>   <span class="info-value" id="d-40yds">—</span></div>
+        <div class="info-row"><span class="info-label">Lesiones</span>    <span class="info-value" id="d-lesiones">—</span></div>
+        <div class="info-row"><span class="info-label">Equipo</span>      <span class="info-value" id="d-equipo">—</span></div>
+      </div>
+
+      <!-- Sección 5: Contactos -->
+      <div class="info-card">
+        <div class="info-card-title">Contactos</div>
+        <div class="info-row"><span class="info-label">Tutor</span>           <span class="info-value" id="d-nombre-tutor">—</span></div>
+        <div class="info-row"><span class="info-label">Tel. tutor</span>      <span class="info-value" id="d-telefono-tutor">—</span></div>
+        <div class="info-row"><span class="info-label">Coach</span>           <span class="info-value" id="d-nombre-coach">—</span></div>
+        <div class="info-row"><span class="info-label">Tel. coach</span>      <span class="info-value" id="d-telefono-coach">—</span></div>
       </div>
 
     </div>
@@ -528,10 +525,6 @@
   </footer>
 
   <script>
-    document.getElementById("cerrar-sesion")?.addEventListener("click", () => {
-      localStorage.removeItem("sesionIniciada");
-      window.location.href = "login.html";
-    });
     const u = localStorage.getItem("usuarioActual") || "";
     const bv = document.getElementById("bienvenida");
     if (bv && u) bv.textContent = u;

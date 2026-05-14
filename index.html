@@ -1,17 +1,257 @@
 <!DOCTYPE html>
 <html lang="es">
-<script>
-  if (!localStorage.getItem("sesionIniciada")) {
-    window.location.href = "login.html";
-  }
-</script>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
-  <title>Reclutamiento MTY</title>
+  <title>Dashboard — Reclutamiento MTY</title>
   <link rel="stylesheet" href="style.css">
-  <script defer src="script.js"></script>
+  <style>
+    /* ── Dashboard layout ── */
+    .dashboard {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px 16px 48px;
+    }
+
+    .dashboard-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #1a2a3a;
+      margin: 0 0 20px;
+    }
+
+    /* ── KPI Cards ── */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+
+    @media (max-width: 1024px) { .kpi-grid { grid-template-columns: repeat(3, 1fr); } }
+    @media (max-width: 600px)  { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+
+    .kpi-card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 16px 14px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.08);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .kpi-card.alerta { border-left: 4px solid #dc3545; }
+
+    .kpi-icon { font-size: 1.3rem; line-height: 1; }
+    .kpi-num  { font-size: 2rem; font-weight: 800; color: #004892; line-height: 1.1; }
+    .kpi-lbl  { font-size: 0.72rem; color: #6c757d; font-weight: 500; text-transform: uppercase; letter-spacing: .03em; }
+
+    .kpi-card.alerta .kpi-num { color: #dc3545; }
+
+    /* ── Skeleton shimmer ── */
+    .skeleton {
+      background: linear-gradient(90deg, #e8edf2 25%, #f4f7fa 50%, #e8edf2 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.4s infinite;
+      border-radius: 6px;
+    }
+
+    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+    .kpi-card.loading .kpi-num,
+    .kpi-card.loading .kpi-lbl,
+    .kpi-card.loading .kpi-icon { visibility: hidden; }
+    .kpi-card.loading { position: relative; overflow: hidden; }
+    .kpi-card.loading::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, #e8edf2 25%, #f4f7fa 50%, #e8edf2 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.4s infinite;
+      border-radius: 10px;
+    }
+
+    /* ── Section titles ── */
+    .section-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #1a2a3a;
+      margin: 0 0 12px;
+      padding-bottom: 6px;
+      border-bottom: 2px solid #e2e8f0;
+    }
+
+    /* ── Pipeline ── */
+    .pipeline-card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.08);
+      margin-bottom: 28px;
+    }
+
+    .pipeline-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      cursor: pointer;
+    }
+
+    .pipeline-row:last-child { margin-bottom: 0; }
+
+    .pipeline-label {
+      width: 130px;
+      font-size: 0.82rem;
+      color: #1a2a3a;
+      font-weight: 500;
+      flex-shrink: 0;
+    }
+
+    .pipeline-track {
+      flex: 1;
+      background: #e9ecef;
+      border-radius: 4px;
+      height: 14px;
+      overflow: hidden;
+    }
+
+    .pipeline-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width .4s ease;
+      min-width: 4px;
+    }
+
+    .pipeline-count {
+      width: 28px;
+      text-align: right;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #495057;
+    }
+
+    /* ── Two-column section ── */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 28px;
+    }
+
+    @media (max-width: 768px) { .two-col { grid-template-columns: 1fr; } }
+
+    .panel-card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.08);
+    }
+
+    .player-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 0;
+      border-bottom: 1px solid #f1f3f5;
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .player-row:last-child { border-bottom: none; }
+    .player-row:hover { background: #f8fafc; border-radius: 6px; }
+
+    .player-name {
+      flex: 1;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #1a2a3a;
+    }
+
+    .player-meta {
+      font-size: 0.75rem;
+      color: #6c757d;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: #fff;
+      white-space: nowrap;
+    }
+
+    .badge-decision {
+      background: #6c757d;
+      color: #fff;
+    }
+
+    /* ── Position pills ── */
+    .pos-section {
+      background: #fff;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.08);
+      margin-bottom: 28px;
+    }
+
+    .pos-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .pos-pill {
+      padding: 5px 14px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #fff;
+      cursor: pointer;
+    }
+
+    .pos-pill:hover { opacity: .85; }
+
+    /* ── Quick access ── */
+    .quick-access {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    @media (max-width: 600px) { .quick-access { grid-template-columns: repeat(2, 1fr); } }
+
+    .qa-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      padding: 20px 12px;
+      background: #fff;
+      border: none;
+      border-radius: 10px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.08);
+      cursor: pointer;
+      text-decoration: none;
+      color: #1a2a3a;
+      font-weight: 600;
+      font-size: 0.88rem;
+      transition: transform .15s, box-shadow .15s;
+    }
+
+    .qa-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,.12); }
+    .qa-btn span { font-size: 1.6rem; }
+
+    /* ── Empty state ── */
+    .empty { color: #adb5bd; font-size: 0.85rem; padding: 12px 0; }
+  </style>
 </head>
 <body>
 
@@ -31,144 +271,61 @@
     </nav>
   </header>
 
-  <!-- Filtros -->
-  <section id="filtros">
-    <div class="filtros-grid">
+  <main>
+    <div class="dashboard">
 
-      <div class="filtro-item">
-        <label for="posicionOfensivaFiltro">Posición</label>
-        <select id="posicionOfensivaFiltro" onchange="filtrarPorPosicionOfensiva()">
-          <option value="">Todas</option>
-          <option value="QB">QB</option>
-          <option value="RB">RB</option>
-          <option value="FB">FB</option>
-          <option value="WR">WR</option>
-          <option value="TE">TE</option>
-          <option value="OT">OT</option>
-          <option value="OG">OG</option>
-          <option value="C">C</option>
-          <option value="DL">DL</option>
-          <option value="LB">LB</option>
-          <option value="CB">CB</option>
-          <option value="S">S</option>
-          <option value="Ninguna">Ninguna</option>
-        </select>
+      <p class="dashboard-title">Dashboard</p>
+
+      <!-- KPI Cards -->
+      <div class="kpi-grid" id="kpi-grid">
+        <div class="kpi-card loading"><div class="kpi-icon">👥</div><div class="kpi-num">—</div><div class="kpi-lbl">Total Prospectos</div></div>
+        <div class="kpi-card loading"><div class="kpi-icon">⭐</div><div class="kpi-num">—</div><div class="kpi-lbl">Favoritos</div></div>
+        <div class="kpi-card loading"><div class="kpi-icon">⚡</div><div class="kpi-num">—</div><div class="kpi-lbl">En Proceso</div></div>
+        <div class="kpi-card loading"><div class="kpi-icon">✅</div><div class="kpi-num">—</div><div class="kpi-lbl">Admitidos</div></div>
+        <div class="kpi-card loading"><div class="kpi-icon">🔴</div><div class="kpi-num">—</div><div class="kpi-lbl">Sin Contacto 7d</div></div>
+        <div class="kpi-card loading"><div class="kpi-icon">🎯</div><div class="kpi-num">—</div><div class="kpi-lbl">Prioridad A</div></div>
       </div>
 
-      <div class="filtro-item">
-        <label for="claseFiltro">Clase</label>
-        <select id="claseFiltro" onchange="filtrarPorClase()">
-          <option value="">Todos</option>
-          <option value="2025">2025</option>
-          <option value="2026">2026</option>
-          <option value="2027">2027</option>
-          <option value="all">2025 · 2026 · 2027</option>
-        </select>
+      <!-- Pipeline -->
+      <div class="pipeline-card">
+        <div class="section-title">Pipeline por Etapa</div>
+        <div id="pipeline-rows"></div>
       </div>
 
-      <div class="filtro-item">
-        <label for="favoritosFiltro">Favoritos</label>
-        <select id="favoritosFiltro" onchange="filtrarPorFavoritos()">
-          <option value="todos">Todos</option>
-          <option value="favoritos">Solo Favoritos</option>
-        </select>
+      <!-- Actividad reciente + Prioridad alta -->
+      <div class="two-col">
+        <div class="panel-card">
+          <div class="section-title">Actividad Reciente</div>
+          <div id="actividad-lista"></div>
+        </div>
+        <div class="panel-card">
+          <div class="section-title">Prioridad Alta</div>
+          <div id="prioridad-lista"></div>
+        </div>
       </div>
 
-      <div class="filtro-item">
-        <label for="estadoFiltro">Estado</label>
-        <select id="estadoFiltro" onchange="filtrarPorEstado()">
-          <option value="Todos">Todos</option>
-          <option value="Aguascalientes">Aguascalientes</option>
-          <option value="Baja California">Baja California</option>
-          <option value="Baja California Sur">Baja California Sur</option>
-          <option value="Campeche">Campeche</option>
-          <option value="Chiapas">Chiapas</option>
-          <option value="Chihuahua">Chihuahua</option>
-          <option value="Ciudad de México">Ciudad de México</option>
-          <option value="Coahuila">Coahuila</option>
-          <option value="Colima">Colima</option>
-          <option value="Durango">Durango</option>
-          <option value="Estado de México">Estado de México</option>
-          <option value="Guanajuato">Guanajuato</option>
-          <option value="Guerrero">Guerrero</option>
-          <option value="Hidalgo">Hidalgo</option>
-          <option value="Jalisco">Jalisco</option>
-          <option value="Michoacán">Michoacán</option>
-          <option value="Morelos">Morelos</option>
-          <option value="Nayarit">Nayarit</option>
-          <option value="Nuevo León">Nuevo León</option>
-          <option value="Oaxaca">Oaxaca</option>
-          <option value="Puebla">Puebla</option>
-          <option value="Querétaro">Querétaro</option>
-          <option value="Quintana Roo">Quintana Roo</option>
-          <option value="San Luis Potosí">San Luis Potosí</option>
-          <option value="Sinaloa">Sinaloa</option>
-          <option value="Sonora">Sonora</option>
-          <option value="Tabasco">Tabasco</option>
-          <option value="Tamaulipas">Tamaulipas</option>
-          <option value="Tlaxcala">Tlaxcala</option>
-          <option value="Veracruz">Veracruz</option>
-          <option value="Yucatán">Yucatán</option>
-          <option value="Zacatecas">Zacatecas</option>
-        </select>
+      <!-- Distribución por posición -->
+      <div class="pos-section">
+        <div class="section-title">Distribución por Posición</div>
+        <div class="pos-pills" id="pos-pills"></div>
       </div>
 
-      <div class="filtro-item">
-        <label for="alturaMinFiltro">Altura mín.</label>
-        <input type="number" id="alturaMinFiltro" oninput="filtrarPorAltura()" placeholder="1.70">
-      </div>
-
-      <div class="filtro-item">
-        <label for="alturaMaxFiltro">Altura máx.</label>
-        <input type="number" id="alturaMaxFiltro" oninput="filtrarPorAltura()" placeholder="2.05">
-      </div>
-
-      <div class="filtro-item">
-        <label for="buscador-nombre">Buscar prospecto</label>
-        <input type="text" id="buscador-nombre" placeholder="Nombre..." oninput="filtrarPorNombre()">
-      </div>
-
-      <div class="filtro-item">
-        <label for="ordenarFiltro">Ordenar por</label>
-        <select id="ordenarFiltro" onchange="ordenarResultados()">
-          <option value="">Sin orden</option>
-          <option value="nombre-az">Nombre A–Z</option>
-          <option value="nombre-za">Nombre Z–A</option>
-          <option value="altura-desc">Altura ↓</option>
-          <option value="altura-asc">Altura ↑</option>
-          <option value="rating-desc">Rating ↓</option>
-          <option value="clase-asc">Clase ↑</option>
-        </select>
-      </div>
-
-      <div class="filtro-item filtro-accion">
-        <button onclick="resetearFiltros()" class="btn-limpiar">✕ Limpiar</button>
+      <!-- Accesos rápidos -->
+      <div class="quick-access">
+        <a href="prospectos.html" class="qa-btn"><span>📋</span>Prospectos</a>
+        <a href="bigboard.html"   class="qa-btn"><span>📊</span>Big Board</a>
+        <a href="procesos.html"   class="qa-btn"><span>🔄</span>Procesos</a>
+        <a href="tareas.html"     class="qa-btn"><span>✅</span>Tareas</a>
       </div>
 
     </div>
-  </section>
-
-  <!-- Resultados -->
-  <main>
-    <section id="resultados-container">
-      <div class="resultados-header">
-        <h2 id="resultados-titulo">Resultados</h2>
-        <div id="stats-bar">
-          <span id="stat-total"></span>
-          <span id="stat-favoritos"></span>
-          <span id="stat-proceso"></span>
-          <button onclick="exportarCSV()" class="btn-exportar">⬇ Exportar CSV</button>
-        </div>
-      </div>
-      <ul id="resultados"></ul>
-      <ul id="lista-jugadores"></ul>
-      <div id="paginacion"></div>
-    </section>
   </main>
 
   <footer>
     <p>&copy; 2025 Reclutamiento MTY — Uso interno</p>
   </footer>
 
+  <script src="config.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>

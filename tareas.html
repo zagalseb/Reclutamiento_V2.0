@@ -1,10 +1,5 @@
 <!DOCTYPE html>
 <html lang="es">
-<script>
-  if (!localStorage.getItem("sesionIniciada")) {
-    window.location.href = "login.html";
-  }
-</script>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -521,21 +516,14 @@
       <div class="form-row">
         <div class="form-group">
           <label>Jugador (opcional)</label>
-          <input type="text" id="f-jugador" placeholder="Nombre completo" list="jugadores-list">
+          <input type="text" id="f-jugador" placeholder="Nombre completo" list="jugadores-list" autocomplete="off">
+          <input type="hidden" id="modal-jugador-id">
           <datalist id="jugadores-list"></datalist>
         </div>
         <div class="form-group">
           <label>Etapa</label>
           <select id="f-etapa">
             <option value="">— Sin etapa —</option>
-            <option>Nuevo</option>
-            <option>Evaluando</option>
-            <option>Contactado</option>
-            <option>Interesado</option>
-            <option>Tryout / Visita</option>
-            <option>Oferta</option>
-            <option>Admitido</option>
-            <option>No interesado</option>
           </select>
         </div>
       </div>
@@ -570,11 +558,8 @@
 
   <!-- Cierre de sesión reutilizable -->
   <script>
-    document.getElementById("cerrar-sesion")?.addEventListener("click", () => {
-      localStorage.removeItem("sesionIniciada");
-      window.location.href = "login.html";
-    });
   </script>
+  <script src="config.js"></script>
   <script src="tareas.js"></script>
 </body>
 </html>

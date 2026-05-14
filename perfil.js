@@ -129,16 +129,11 @@
 
   // ── Render hero (Sección 1) ──────────────────────────
   function renderHero(j) {
-    const nombre = [j.nombre, j.apellido_paterno, j.apellido_materno]
-      .filter(Boolean).join(" ");
-    $("h-nombre").textContent = nombre;
+    $("h-nombre").textContent = j.nombre || "—";
 
     // Tags
     const tags = [];
-    if (j.posicion_principal) tags.push(j.posicion_principal);
-    if (j.posicion_secundaria && j.posicion_secundaria !== j.posicion_principal)
-      tags.push(j.posicion_secundaria);
-    if (j.clase)   tags.push(`Clase ${j.clase}`);
+    if (j.posicion) tags.push(j.posicion);
     const tagsEl = $("h-tags");
     tagsEl.innerHTML = tags
       .map(t => `<span class="hero-tag">${esc(t)}</span>`)
@@ -161,30 +156,29 @@
   // ── Render info sections (2-4) ───────────────────────
   function renderInfo(j) {
     // Sección 2 — Personales
-    text("d-ciudad",     j.ciudad);
     text("d-estado",     j.estado);
     text("d-telefono",   j.telefono);
     text("d-email",      j.email);
-    text("d-instagram",  j.instagram);
-    text("d-tiktok",     j.tiktok);
     text("d-nacimiento", j.fecha_nacimiento);
-    text("d-lugar-nac",  j.lugar_nacimiento);
 
     // Sección 3 — Académicos
-    text("d-prepa",        j.preparatoria);
-    text("d-ciudad-prepa", j.ciudad_prepa);
-    text("d-estado-prepa", j.estado_prepa);
-    text("d-promedio",     j.promedio);
-    text("d-idioma",       j.otro_idioma);
+    text("d-prepa",      j.preparatoria);
+    text("d-promedio",   j.promedio);
+    text("d-semestre",   j.semestre_prepa);
 
     // Sección 4 — Atléticos
-    text("d-estatura",  j.estatura ? `${j.estatura} m`   : null);
-    text("d-peso",      j.peso     ? `${j.peso} kg`      : null);
+    text("d-posicion",  j.posicion);
+    text("d-altura",    j.altura ? `${j.altura} m`  : null);
+    text("d-peso",      j.peso   ? `${j.peso} kg`   : null);
     text("d-40yds",     j.cuarenta_yardas ? `${j.cuarenta_yardas} s` : null);
-    text("d-vertical",  j.salto_vertical  ? `${j.salto_vertical} cm` : null);
-    text("d-equipo",    j.equipo_anterior);
-    text("d-logros",    j.logros);
     text("d-lesiones",  j.lesiones);
+    text("d-equipo",    j.nombre_equipo);
+
+    // Sección 5 — Contactos
+    text("d-nombre-tutor",    j.nombre_tutor);
+    text("d-telefono-tutor",  j.telefono_tutor);
+    text("d-nombre-coach",    j.nombre_coach);
+    text("d-telefono-coach",  j.telefono_coach);
   }
 
   // ── Render highlights (Sección 5) ───────────────────
@@ -192,7 +186,6 @@
     const videos = [
       { label: "Highlights 1", url: j.video_1 },
       { label: "Highlights 2", url: j.video_2 },
-      { label: "Highlights 3", url: j.video_3 },
     ].filter(v => v.url && v.url.trim());
 
     if (videos.length === 0) return;

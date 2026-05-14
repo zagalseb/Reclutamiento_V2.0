@@ -1,46 +1,57 @@
-/* tareas.js – Panel de Tareas & Alertas
-   Persistencia: localStorage
-   Key tareas:          tareas_{username}      → array de objetos tarea
-   Key procesos index:  procesos_{username}    → array de playerKeys
-   Key proceso data:    proceso_{playerKey}    → objeto proceso CRM
+/* tareas.js — Panel de Tareas & Alertas
+   Persistencia: Supabase REST API
 */
 
 (function () {
   "use strict";
 
-  // ─── Config ───────────────────────────────────────────────────────────────
-  const DIAS_SIN_CONTACTO = 7; // días sin actualización para mostrar alerta
+  // ─── Supabase ─────────────────────────────────────────────────────────────
+  const SB_URL = CONFIG.SUPABASE_URL;
+  const SB_KEY = CONFIG.SUPABASE_KEY;
+  const SB_HDR = { apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}` };
+
+  async function sbGet(path) {
+    const res = await fetch(`${SB_URL}/rest/v1/${path}`, { headers: SB_HDR });
+    if (!res.ok) throw new Error(`GET ${path}: ${res.status}`);
+    return res.json();
+  }
+
+  async function sbPost(table, body) {
+    const res = await fetch(`${SB_URL}/rest/v1/${table}`, {
+      method: "POST",
+      headers: { ...SB_HDR, "Content-Type": "application/json", "Prefer": "return=representation" },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) throw new Error(`POST ${table}: ${res.status}`);
+    return res.json();
+  }
+
+  async function sbPatch(table, id, body) {
+    const res = await fetch(`${SB_URL}/rest/v1/${table}?id=eq.${encodeURIComponent(id)}`, {
+      method: "PATCH",
+      headers: { ...SB_HDR, "Content-Type": "application/json", "Prefer": "return=representation" },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) throw new Error(`PATCH ${table}/${id}: ${res.status}`);
+    return res.json();
+  }
+
+  async function sbDelete(table, id) {
+    const res = await fetch(`${SB_URL}/rest/v1/${table}?id=eq.${encodeURIComponent(id)}`, {
+      method: "DELETE",
+      headers: SB_HDR,
+    });
+    if (!res.ok) throw new Error(`DELETE ${table}/${id}: ${res.status}`);
+  }
 
   // ─── State ────────────────────────────────────────────────────────────────
-  let tareas = [];
-  let editingId = null;
-  let vista = "tareas";
+  let tareas        = [];   // tareas con jugadores join
+  let jugadoresLista = [];  // { id, nombre, apellido_paterno }
+  let procesosData  = [];   // { jugador_id, etapa, updated_at }
+  let editingId     = null;
+  let vista         = "tareas";
 
   // ─── Helpers ──────────────────────────────────────────────────────────────
-  function username() {
-    return localStorage.getItem("usuarioActual") || "guest";
-  }
-
-  function tareasKey() {
-    return `tareas_${username()}`;
-  }
-
-  function loadTareas() {
-    try {
-      return JSON.parse(localStorage.getItem(tareasKey()) || "[]");
-    } catch {
-      return [];
-    }
-  }
-
-  function saveTareas(arr) {
-    localStorage.setItem(tareasKey(), JSON.stringify(arr));
-  }
-
-  function uid() {
-    return Date.now().toString(36) + Math.random().toString(36).slice(2);
-  }
-
   function todayStr() {
     return new Date().toISOString().slice(0, 10);
   }
@@ -53,92 +64,109 @@
 
   function formatDate(str) {
     if (!str) return "";
-    const [y, m, d] = str.split("-");
+    const [y, m, d] = str.slice(0, 10).split("-");
     return `${d}/${m}/${y}`;
   }
 
   function daysDiff(dateStr) {
     if (!dateStr) return null;
     const now = new Date(); now.setHours(0, 0, 0, 0);
-    const d   = new Date(dateStr + "T00:00:00");
+    const d   = new Date(dateStr.slice(0, 10) + "T00:00:00");
     return Math.round((d - now) / 86400000);
   }
 
   function escHtml(s) {
     return String(s || "")
-      .replace(/&/g,"&amp;")
-      .replace(/</g,"&lt;")
-      .replace(/>/g,"&gt;")
-      .replace(/"/g,"&quot;");
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
   }
 
-  // ─── Procesos index ───────────────────────────────────────────────────────
-  function getProcesosIndex() {
-    try {
-      return JSON.parse(localStorage.getItem(`procesos_${username()}`) || "[]");
-    } catch { return []; }
+  function jugadorNombre(t) {
+    if (t.jugadores) {
+      return `${t.jugadores.nombre || ""} ${t.jugadores.apellido_paterno || ""}`.trim();
+    }
+    return "";
   }
 
-  function loadProceso(playerKey) {
-    try {
-      return JSON.parse(localStorage.getItem(`proceso_${playerKey}`) || "null");
-    } catch { return null; }
+  // ─── Carga de datos ───────────────────────────────────────────────────────
+  async function cargarDatos() {
+    const [tareasRaw, jugs, procs] = await Promise.all([
+      sbGet("tareas?select=*,jugadores(nombre,apellido_paterno)&order=fecha.asc.nullslast"),
+      sbGet("jugadores?select=id,nombre,apellido_paterno&order=apellido_paterno.asc"),
+      sbGet("procesos?select=jugador_id,etapa,updated_at&etapa=neq.Admitido&etapa=neq.No%20interesado"),
+    ]);
+    tareas         = tareasRaw;
+    jugadoresLista = jugs;
+    procesosData   = procs;
   }
 
-  function parsePlayerKey(playerKey) {
-    const parts = (playerKey || "").split("_");
-    if (parts.length < 3) return { nombre: playerKey, apellido: "" };
-    return { nombre: parts[1] || "", apellido: parts.slice(2).join(" ") };
+  async function recargarYRender() {
+    const [tareasRaw, procs] = await Promise.all([
+      sbGet("tareas?select=*,jugadores(nombre,apellido_paterno)&order=fecha.asc.nullslast"),
+      sbGet("procesos?select=jugador_id,etapa,updated_at&etapa=neq.Admitido&etapa=neq.No%20interesado"),
+    ]);
+    tareas       = tareasRaw;
+    procesosData = procs;
+    renderAll();
   }
 
-  // ─── Jugadores para datalist ──────────────────────────────────────────────
-  async function poblarDatalist() {
+  // ─── Datalist jugadores ───────────────────────────────────────────────────
+  function poblarDatalist() {
     const dl = document.getElementById("jugadores-list");
     if (!dl) return;
-    try {
-      const resp = await fetch("jugadores.tsv");
-      if (!resp.ok) return;
-      const text = await resp.text();
-      const rows = text.split("\n").filter(Boolean);
-      const headers = rows[0].split("\t").map(h => h.trim());
-      const iNombre   = headers.indexOf("Nombre");
-      const iApellido = headers.indexOf("Apellido");
-      rows.slice(1).forEach(row => {
-        const cols = row.split("\t");
-        const nombre   = (cols[iNombre]   || "").trim();
-        const apellido = (cols[iApellido] || "").trim();
-        if (!nombre) return;
-        const opt = document.createElement("option");
-        opt.value = `${nombre} ${apellido}`.trim();
-        dl.appendChild(opt);
-      });
-    } catch { /* sin fetch */ }
+    dl.innerHTML = jugadoresLista
+      .map(j => `<option value="${escHtml(`${j.nombre} ${j.apellido_paterno}`.trim())}" data-id="${escHtml(j.id)}">`)
+      .join("");
+  }
+
+  function bindJugadorInput() {
+    const input  = document.getElementById("f-jugador");
+    const hidden = document.getElementById("modal-jugador-id");
+    if (!input || !hidden) return;
+    input.addEventListener("input", () => {
+      const val   = input.value.trim().toLowerCase();
+      const match = jugadoresLista.find(j =>
+        `${j.nombre} ${j.apellido_paterno}`.trim().toLowerCase() === val
+      );
+      hidden.value = match ? match.id : "";
+    });
+  }
+
+  // ─── Etapas dinámicas desde CONFIG ───────────────────────────────────────
+  function poblarEtapas() {
+    const sel = document.getElementById("f-etapa");
+    if (!sel) return;
+    sel.innerHTML =
+      `<option value="">— Sin etapa —</option>` +
+      CONFIG.ETAPAS.map(e => `<option value="${escHtml(e)}">${escHtml(e)}</option>`).join("");
   }
 
   // ─── KPIs ─────────────────────────────────────────────────────────────────
   function actualizarKPIs(lista) {
-    const hoy  = todayStr();
-    const fin  = endOfWeekStr();
+    const hoy = todayStr();
+    const fin = endOfWeekStr();
     let vencidas = 0, hoyC = 0, semana = 0, completadas = 0;
 
     lista.forEach(t => {
       if (t.completada) { completadas++; return; }
-      if (!t.fecha) return;
-      if (t.fecha < hoy)       vencidas++;
-      else if (t.fecha === hoy) hoyC++;
-      else if (t.fecha <= fin)  semana++;
+      const fecha = t.fecha ? t.fecha.slice(0, 10) : null;
+      if (!fecha) return;
+      if (fecha < hoy)        vencidas++;
+      else if (fecha === hoy) hoyC++;
+      else if (fecha <= fin)  semana++;
     });
 
-    document.getElementById("kpi-vencidas").textContent   = vencidas;
-    document.getElementById("kpi-hoy").textContent        = hoyC;
-    document.getElementById("kpi-proximas").textContent   = semana;
+    document.getElementById("kpi-vencidas").textContent    = vencidas;
+    document.getElementById("kpi-hoy").textContent         = hoyC;
+    document.getElementById("kpi-proximas").textContent    = semana;
     document.getElementById("kpi-completadas").textContent = completadas;
 
-    // Banner de alerta
-    const banner = document.getElementById("alert-banner");
+    const banner    = document.getElementById("alert-banner");
     const alertText = document.getElementById("alert-text");
     if (vencidas > 0) {
-      alertText.innerHTML = `Tienes <strong>${vencidas}</strong> tarea${vencidas > 1 ? "s" : ""} vencida${vencidas > 1 ? "s" : ""}. 
+      alertText.innerHTML = `Tienes <strong>${vencidas}</strong> tarea${vencidas > 1 ? "s" : ""} vencida${vencidas > 1 ? "s" : ""}.
         <a onclick="document.getElementById('filter-estado').value='pendiente';renderAll()">Verlas ahora →</a>`;
       banner.classList.remove("hidden");
     } else {
@@ -149,26 +177,25 @@
   // ─── Categorizar tarea ────────────────────────────────────────────────────
   function categoria(t) {
     if (t.completada) return "completada";
-    if (!t.fecha) return "sinfecha";
+    const fecha = t.fecha ? t.fecha.slice(0, 10) : null;
+    if (!fecha) return "sinfecha";
     const hoy = todayStr();
     const fin = endOfWeekStr();
-    if (t.fecha < hoy)        return "vencida";
-    if (t.fecha === hoy)      return "hoy";
-    if (t.fecha <= fin)       return "semana";
+    if (fecha < hoy)        return "vencida";
+    if (fecha === hoy)      return "hoy";
+    if (fecha <= fin)       return "semana";
     return "despues";
   }
 
   // ─── Render tarea card ────────────────────────────────────────────────────
   function tareaCard(t) {
-    const cat = categoria(t);
+    const cat  = categoria(t);
     const diff = daysDiff(t.fecha);
     let dateLabel = "";
     let dateClass = "";
 
     if (t.fecha) {
-      if (diff === null) {
-        dateLabel = "";
-      } else if (diff < 0) {
+      if (diff < 0) {
         dateLabel = `Venció hace ${Math.abs(diff)} día${Math.abs(diff) > 1 ? "s" : ""}`;
         dateClass = "vencida";
       } else if (diff === 0) {
@@ -185,18 +212,20 @@
       cat === "vencida" ? "urgente" :
       cat === "hoy"     ? "hoy"     : "normal";
 
+    const nombre = jugadorNombre(t);
+
     return `
       <div class="task-card ${cardClass}" data-id="${escHtml(t.id)}">
-        <div class="task-check" onclick="toggleCompletar('${escHtml(t.id)}')">
+        <div class="task-check" onclick="toggleCompletar('${escHtml(t.id)}',${!!t.completada})">
           <span class="task-check-mark">✓</span>
         </div>
         <div class="task-body">
           <div class="task-title">${escHtml(t.titulo)}</div>
           <div class="task-meta">
-            ${t.jugador ? `<span class="task-tag tag-jugador">👤 ${escHtml(t.jugador)}</span>` : ""}
+            ${nombre    ? `<span class="task-tag tag-jugador">👤 ${escHtml(nombre)}</span>` : ""}
             ${t.etapa   ? `<span class="task-tag tag-etapa">${escHtml(t.etapa)}</span>` : ""}
             ${t.prioridad ? `<span class="task-tag tag-prioridad-${escHtml(t.prioridad)}">Prioridad ${escHtml(t.prioridad)}</span>` : ""}
-            ${dateLabel ? `<span class="task-date ${dateClass}">📅 ${dateLabel}</span>` : ""}
+            ${dateLabel  ? `<span class="task-date ${dateClass}">📅 ${dateLabel}</span>` : ""}
           </div>
           ${t.notas ? `<div style="margin-top:6px;font-size:.78rem;color:#666;font-family:'Inter',sans-serif;">${escHtml(t.notas)}</div>` : ""}
         </div>
@@ -208,22 +237,20 @@
     `;
   }
 
-  // ─── Render principal ──────────────────────────────────────────────────────
+  // ─── Render principal ─────────────────────────────────────────────────────
   window.renderAll = function () {
-    tareas = loadTareas();
-
     const q         = (document.getElementById("search-tareas")?.value || "").toLowerCase();
     const filPri    = document.getElementById("filter-prioridad")?.value || "";
     const filEstado = document.getElementById("filter-estado")?.value || "pendiente";
 
-    // Filtrar
-    let filtradas = tareas.filter(t => {
-      const haystack = `${t.titulo} ${t.jugador} ${t.etapa} ${t.notas}`.toLowerCase();
-      const okQ  = !q || haystack.includes(q);
-      const okP  = !filPri || t.prioridad === filPri;
-      const okE  = filEstado === "todas" ? true :
-                   filEstado === "completada" ? t.completada :
-                   !t.completada;
+    const filtradas = tareas.filter(t => {
+      const nombre   = jugadorNombre(t);
+      const haystack = `${t.titulo} ${nombre} ${t.etapa || ""} ${t.notas || ""}`.toLowerCase();
+      const okQ = !q || haystack.includes(q);
+      const okP = !filPri || t.prioridad === filPri;
+      const okE = filEstado === "todas"      ? true :
+                  filEstado === "completada" ? t.completada :
+                  !t.completada;
       return okQ && okP && okE;
     });
 
@@ -237,22 +264,15 @@
   };
 
   function renderTareas(filtradas) {
-    const buckets = {
-      vencidas: [],
-      hoy:      [],
-      semana:   [],
-      despues:  [],
-      sinfecha: [],
-    };
+    const buckets = { vencidas: [], hoy: [], semana: [], despues: [], sinfecha: [] };
 
     filtradas.forEach(t => {
       const cat = categoria(t);
-      if      (cat === "vencida")    buckets.vencidas.push(t);
-      else if (cat === "hoy")        buckets.hoy.push(t);
-      else if (cat === "semana")     buckets.semana.push(t);
-      else if (cat === "despues")    buckets.despues.push(t);
-      else if (cat === "sinfecha")   buckets.sinfecha.push(t);
-      // completadas se omiten de los buckets — ya están filtradas arriba
+      if      (cat === "vencida")  buckets.vencidas.push(t);
+      else if (cat === "hoy")      buckets.hoy.push(t);
+      else if (cat === "semana")   buckets.semana.push(t);
+      else if (cat === "despues")  buckets.despues.push(t);
+      else if (cat === "sinfecha") buckets.sinfecha.push(t);
     });
 
     const fill = (listId, cntId, blockId, arr) => {
@@ -263,8 +283,8 @@
       listEl.innerHTML = arr.length
         ? arr.map(tareaCard).join("")
         : `<div class="empty-state"><div class="icon">✅</div><div>Sin tareas aquí</div></div>`;
-      if (cntEl)   cntEl.textContent = arr.length;
-      if (blockEl) blockEl.style.display = arr.length === 0 && listEl.querySelector(".empty-state") ? "none" : "";
+      if (cntEl)   cntEl.textContent  = arr.length;
+      if (blockEl) blockEl.style.display = arr.length === 0 ? "none" : "";
     };
 
     fill("list-vencidas", "cnt-vencidas", "block-vencidas", buckets.vencidas);
@@ -272,13 +292,6 @@
     fill("list-semana",   "cnt-semana",   "block-semana",   buckets.semana);
     fill("list-despues",  "cnt-despues",  "block-despues",  buckets.despues);
     fill("list-sinfecha", "cnt-sinfecha", "block-sinfecha", buckets.sinfecha);
-
-    // Ocultar secciones vacías
-    ["vencidas","hoy","semana","despues","sinfecha"].forEach(key => {
-      const block = document.getElementById(`block-${key}`);
-      const cnt   = parseInt(document.getElementById(`cnt-${key}`)?.textContent || "0");
-      if (block) block.style.display = cnt === 0 ? "none" : "";
-    });
   }
 
   // ─── Vista: Sin contacto ──────────────────────────────────────────────────
@@ -288,26 +301,30 @@
     const cntEl     = document.getElementById("cnt-sincontacto");
     if (!container) return;
 
-    const hoy = new Date(); hoy.setHours(0,0,0,0);
-    const keys = getProcesosIndex();
-    const resultados = [];
+    const hoy = new Date(); hoy.setHours(0, 0, 0, 0);
 
-    keys.forEach(playerKey => {
-      const proc = loadProceso(playerKey);
-      if (!proc) return;
-      if (proc.stage === "Admitido" || proc.stage === "No interesado") return;
+    const mapaJug = {};
+    jugadoresLista.forEach(j => { mapaJug[j.id] = j; });
 
-      const last = proc.lastUpdated ? new Date(proc.lastUpdated) : null;
-      if (!last || isNaN(last)) return;
-      last.setHours(0,0,0,0);
-      const dias = Math.round((hoy - last) / 86400000);
-      if (dias >= DIAS_SIN_CONTACTO) {
-        const { nombre, apellido } = parsePlayerKey(playerKey);
-        resultados.push({ playerKey, nombre, apellido, dias, stage: proc.stage, priority: proc.priority });
-      }
-    });
-
-    resultados.sort((a, b) => b.dias - a.dias);
+    const resultados = procesosData
+      .filter(p => {
+        if (!p.updated_at) return false;
+        const last = new Date(p.updated_at); last.setHours(0, 0, 0, 0);
+        return Math.round((hoy - last) / 86400000) >= 7;
+      })
+      .map(p => {
+        const j    = mapaJug[p.jugador_id] || {};
+        const last = new Date(p.updated_at); last.setHours(0, 0, 0, 0);
+        const dias = Math.round((hoy - last) / 86400000);
+        return {
+          id:      p.jugador_id,
+          nombre:  j.nombre || "",
+          apellido: j.apellido_paterno || "",
+          etapa:   p.etapa || "—",
+          dias,
+        };
+      })
+      .sort((a, b) => b.dias - a.dias);
 
     cntEl.textContent = resultados.length;
 
@@ -319,14 +336,13 @@
     empty.classList.add("hidden");
 
     container.innerHTML = resultados.map(r => {
-      const initials = `${r.nombre[0] || ""}${(r.apellido[0] || "")}`.toUpperCase();
-      const perfilUrl = `perfil.html?nombre=${encodeURIComponent(r.nombre)}&apellido=${encodeURIComponent(r.apellido)}`;
+      const initials = `${r.nombre[0] || ""}${r.apellido[0] || ""}`.toUpperCase();
       return `
-        <a class="sin-contacto-card" href="${perfilUrl}">
+        <a class="sin-contacto-card" href="perfil.html?id=${encodeURIComponent(r.id)}">
           <div class="avatar">${escHtml(initials)}</div>
           <div class="info">
             <div class="sc-name">${escHtml(r.nombre)} ${escHtml(r.apellido)}</div>
-            <div class="sc-meta">${escHtml(r.stage)} · Prioridad ${escHtml(r.priority || "–")}</div>
+            <div class="sc-meta">${escHtml(r.etapa)}</div>
           </div>
           <div class="sc-days">
             ${r.dias}
@@ -337,7 +353,7 @@
     }).join("");
   }
 
-  // ─── Vista toggle ──────────────────────────────────────────────────────────
+  // ─── Vista toggle ─────────────────────────────────────────────────────────
   window.setVista = function (v) {
     vista = v;
     document.getElementById("vista-tareas").style.display  = v === "tareas"  ? "" : "none";
@@ -350,19 +366,20 @@
   // ─── Modal ────────────────────────────────────────────────────────────────
   window.abrirModal = function (id) {
     editingId = id || null;
-    const modal = document.getElementById("modal-overlay");
     const titulo = document.getElementById("modal-titulo");
+    const hidden = document.getElementById("modal-jugador-id");
 
     if (id) {
       const t = tareas.find(x => x.id === id);
       if (!t) return;
       titulo.textContent = "Editar tarea";
       document.getElementById("f-titulo").value    = t.titulo    || "";
-      document.getElementById("f-jugador").value   = t.jugador   || "";
+      document.getElementById("f-jugador").value   = jugadorNombre(t);
       document.getElementById("f-etapa").value     = t.etapa     || "";
-      document.getElementById("f-fecha").value     = t.fecha     || "";
+      document.getElementById("f-fecha").value     = (t.fecha || "").slice(0, 10);
       document.getElementById("f-prioridad").value = t.prioridad || "B";
       document.getElementById("f-notas").value     = t.notas     || "";
+      if (hidden) hidden.value = t.jugador_id || "";
     } else {
       titulo.textContent = "Nueva tarea";
       document.getElementById("f-titulo").value    = "";
@@ -371,9 +388,10 @@
       document.getElementById("f-fecha").value     = todayStr();
       document.getElementById("f-prioridad").value = "B";
       document.getElementById("f-notas").value     = "";
+      if (hidden) hidden.value = "";
     }
 
-    modal.classList.add("open");
+    document.getElementById("modal-overlay").classList.add("open");
     document.getElementById("f-titulo").focus();
   };
 
@@ -386,7 +404,7 @@
     if (e.target === document.getElementById("modal-overlay")) cerrarModal();
   };
 
-  window.guardarTarea = function () {
+  window.guardarTarea = async function () {
     const titulo = (document.getElementById("f-titulo").value || "").trim();
     if (!titulo) {
       document.getElementById("f-titulo").style.borderColor = "#c0392b";
@@ -395,63 +413,67 @@
     }
     document.getElementById("f-titulo").style.borderColor = "";
 
-    const tarea = {
-      id:         editingId || uid(),
-      titulo,
-      jugador:    (document.getElementById("f-jugador").value   || "").trim(),
-      etapa:      (document.getElementById("f-etapa").value     || "").trim(),
-      fecha:      (document.getElementById("f-fecha").value     || "").trim(),
-      prioridad:  (document.getElementById("f-prioridad").value || "B"),
-      notas:      (document.getElementById("f-notas").value     || "").trim(),
-      completada: false,
-      creadaEn:   editingId ? (tareas.find(x=>x.id===editingId)?.creadaEn || new Date().toISOString()) : new Date().toISOString(),
-    };
+    const jugadorId = (document.getElementById("modal-jugador-id")?.value || "").trim() || null;
+    const etapa     = (document.getElementById("f-etapa").value    || "").trim() || null;
+    const fecha     = (document.getElementById("f-fecha").value    || "").trim() || null;
+    const prioridad =  document.getElementById("f-prioridad").value || "B";
+    const notas     = (document.getElementById("f-notas").value    || "").trim() || null;
+    const now       = new Date().toISOString();
 
-    tareas = loadTareas();
-    if (editingId) {
-      const idx = tareas.findIndex(x => x.id === editingId);
-      if (idx >= 0) {
-        tarea.completada = tareas[idx].completada;
-        tareas[idx] = tarea;
+    const payload = { titulo, jugador_id: jugadorId, etapa, prioridad, fecha, notas, updated_at: now };
+
+    try {
+      if (editingId) {
+        await sbPatch("tareas", editingId, payload);
+      } else {
+        await sbPost("tareas", { ...payload, completada: false });
       }
-    } else {
-      tareas.unshift(tarea);
+      cerrarModal();
+      await recargarYRender();
+    } catch (err) {
+      alert("Error al guardar la tarea. Intenta de nuevo.");
+      console.error(err);
     }
-
-    saveTareas(tareas);
-    cerrarModal();
-    renderAll();
   };
 
   // ─── Acciones ─────────────────────────────────────────────────────────────
-  window.toggleCompletar = function (id) {
-    tareas = loadTareas();
-    const t = tareas.find(x => x.id === id);
-    if (!t) return;
-    t.completada = !t.completada;
-    saveTareas(tareas);
-    renderAll();
+  window.toggleCompletar = async function (id, actual) {
+    try {
+      await sbPatch("tareas", id, { completada: !actual, updated_at: new Date().toISOString() });
+      await recargarYRender();
+    } catch (err) {
+      console.error("Error al actualizar tarea:", err);
+    }
   };
 
   window.editarTarea = function (id) {
-    tareas = loadTareas();
     abrirModal(id);
   };
 
-  window.borrarTarea = function (id) {
+  window.borrarTarea = async function (id) {
     if (!confirm("¿Eliminar esta tarea?")) return;
-    tareas = loadTareas().filter(x => x.id !== id);
-    saveTareas(tareas);
-    renderAll();
+    try {
+      await sbDelete("tareas", id);
+      await recargarYRender();
+    } catch (err) {
+      console.error("Error al eliminar tarea:", err);
+    }
   };
 
   // ─── Init ─────────────────────────────────────────────────────────────────
-  document.addEventListener("DOMContentLoaded", () => {
-    tareas = loadTareas();
+  document.addEventListener("DOMContentLoaded", async () => {
+    poblarEtapas();
+
+    try {
+      await cargarDatos();
+    } catch (err) {
+      console.error("Error al cargar datos de Supabase:", err);
+    }
+
     poblarDatalist();
+    bindJugadorInput();
     renderAll();
 
-    // Keyboard shortcut: Escape cierra modal
     document.addEventListener("keydown", e => {
       if (e.key === "Escape") cerrarModal();
     });

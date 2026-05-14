@@ -33,13 +33,14 @@
   }
 
   function fullName(j) {
-    return [j.nombre, j.apellido_paterno].filter(Boolean).join(" ");
+    return j.nombre || "";
   }
 
   function initials(j) {
-    const a = (j.nombre          || "").charAt(0).toUpperCase();
-    const b = (j.apellido_paterno || "").charAt(0).toUpperCase();
-    return (a + b) || "?";
+    const parts = (j.nombre || "").trim().split(/\s+/);
+    const a = (parts[0] || "").charAt(0).toUpperCase();
+    const b = (parts[parts.length - 1] || "").charAt(0).toUpperCase();
+    return (parts.length > 1 ? a + b : a) || "?";
   }
 
   function starsHTML(n) {
@@ -52,7 +53,7 @@
 
   async function fetchFavoritos() {
     const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/jugadores?favorito=eq.true&select=id,nombre,apellido_paterno,posicion_principal,clase,ciudad,estado,calificacion`,
+      `${SUPABASE_URL}/rest/v1/jugadores?favorito=eq.true&select=id,nombre,posicion,estado,calificacion`,
       {
         headers: {
           apikey:        SUPABASE_KEY,
@@ -67,11 +68,11 @@
   // ── Card builder ──────────────────────────────────────
 
   function makeCard(j) {
-    const pos    = j.posicion_principal || "";
+    const pos    = j.posicion || "";
     const color  = POS_COLOR[pos]       || "#2e3348";
     const avBg   = POS_AVATAR_BG[pos]   || "#1e2230";
     const name   = fullName(j);
-    const loc    = [j.ciudad, j.estado].filter(Boolean).join(", ");
+    const loc    = j.estado || "";
 
     const avatarHTML = `<div class="bb-avatar-ini" style="background:${avBg}">${esc(initials(j))}</div>`;
 
@@ -85,7 +86,7 @@
         ${avatarHTML}
         <div class="bb-name-block">
           <div class="bb-name">${esc(name)}</div>
-          <div class="bb-pos-clase">${esc(pos)}${j.clase ? ` · ${esc(j.clase)}` : ""}</div>
+          <div class="bb-pos-clase">${esc(pos)}</div>
         </div>
       </div>
       ${loc ? `<div class="bb-location">${esc(loc)}</div>` : ""}
@@ -120,7 +121,7 @@
     // Group by position
     const groups = {};
     jugadores.forEach(j => {
-      const pos = j.posicion_principal || "—";
+      const pos = j.posicion || "—";
       if (!groups[pos]) groups[pos] = [];
       groups[pos].push(j);
     });

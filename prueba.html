@@ -1,10 +1,5 @@
 <!DOCTYPE html>
 <html lang="es">
-<script>
-  if (!localStorage.getItem("sesionIniciada")) {
-    window.location.href = "login.html";
-  }
-</script>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -326,10 +321,6 @@
   </footer>
 
   <script>
-    document.getElementById("cerrar-sesion")?.addEventListener("click", () => {
-      localStorage.removeItem("sesionIniciada");
-      window.location.href = "login.html";
-    });
   </script>
   <script src="prueba.js"></script>
 </body>

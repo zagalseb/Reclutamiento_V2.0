@@ -45,8 +45,8 @@
 
     while (true) {
       const url = `${SUPABASE_URL}/rest/v1/${TABLE}` +
-        `?select=id,nombre,apellido_paterno,apellido_materno,posicion_principal,clase,ciudad,estado,estatura,peso,cuarenta_yardas,calificacion,favorito,procesos(etapa)` +
-        `&order=apellido_paterno.asc` +
+        `?select=id,nombre,posicion,estado,altura,peso,cuarenta_yardas,calificacion,favorito,procesos(etapa)` +
+        `&order=nombre.asc` +
         `&offset=${from}&limit=${pageSize}`;
 
       const res = await fetch(url, {
@@ -68,8 +68,7 @@
 
   // ── Helpers ────────────────────────────────────────
   function fullName(j) {
-    return [j.nombre, j.apellido_paterno, j.apellido_materno]
-      .filter(Boolean).join(" ");
+    return j.nombre || "";
   }
 
   function stars(n) {
@@ -105,7 +104,7 @@
     const decisionesSeleccionadas = getChecked("dd-decision-panel");
 
     filtered = allJugadores.filter(j => {
-      if (pos   && (j.posicion_principal || "").toLowerCase() !== pos)   return false;
+      if (pos   && (j.posicion || "").toLowerCase() !== pos)   return false;
       if (clase  && String(j.clase || "") !== clase)                      return false;
       if (estado && (j.estado || "").toLowerCase() !== estado)            return false;
       if (q     && !fullName(j).toLowerCase().includes(q))               return false;
@@ -164,11 +163,9 @@
         <tr data-id="${esc(j.id)}">
           <td>${n}</td>
           <td><strong>${esc(fullName(j))}</strong></td>
-          <td>${esc(j.posicion_principal || "—")}</td>
-          <td>${esc(j.clase || "—")}</td>
-          <td>${esc(j.ciudad || "—")}</td>
+          <td>${esc(j.posicion || "—")}</td>
           <td>${esc(j.estado || "—")}</td>
-          <td>${j.estatura ? esc(j.estatura) + " m" : "—"}</td>
+          <td>${j.altura ? esc(j.altura) + " m" : "—"}</td>
           <td>${j.peso ? esc(j.peso) + " kg" : "—"}</td>
           <td>${j.cuarenta_yardas ? esc(j.cuarenta_yardas) + "s" : "—"}</td>
           <td>${stars(j.calificacion)}</td>
