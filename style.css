@@ -1,0 +1,1209 @@
+/* General */
+body {
+  font-family: 'Roboto', Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f0f4f8;
+  color: #1a2a3a;
+  line-height: 1.6;
+}
+
+/* Encabezados */
+h1, h2 {
+  color: #ffffff;
+  text-align: center;
+  margin: 20px 0;
+}
+
+button.favorito-btn,
+button.proceso-btn {
+  padding: 10px;
+  width: 100px; /* Ancho fijo para evitar cambios bruscos */
+  font-size: 14px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  text-align: center;
+}
+
+button.favorito-btn.activo,
+button.proceso-btn.activo {
+  background-color: #0056b3; /* Color activo */
+}
+
+button.favorito-btn:hover,
+button.proceso-btn:hover {
+  background-color: #0056b3; /* Hover */
+}
+
+.jugador-card button {
+margin-right: 10px; /* Añade espacio entre botones */
+}
+
+.prospecto-card {
+  background-color: #0b3a70;
+  color: #ffffff !important; 
+  padding: 16px 20px;
+  border-radius: 10px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+
+.prospecto-card h3 {
+  margin: 0 0 8px;
+  color: #ffffff !important; 
+}
+
+.depth-chart-table tbody tr.dragging {
+  opacity: 0.6;
+}
+
+.depth-chart-table tbody tr {
+  cursor: grab;
+}
+/* Hacer blanco únicamente el nombre del jugador en roster.html */
+.pagina-roster .prospecto-card h3 {
+    color: white !important;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.6); /* más estilo Madden */
+}
+
+
+
+
+
+
+.botones-container {
+display: flex;
+flex-direction: column; /* Coloca los botones en columna */
+align-items: flex-end; /* Alinea a la derecha */
+gap: 5px; /* Espaciado entre botones */
+}
+
+
+
+#contacto {
+display: flex;
+flex-direction: column;
+gap: 20px; /* Espacio entre elementos del contacto */
+}
+
+#notas {
+margin-top: 20px;
+padding: 15px;
+background-color: #f8f9fa; /* Fondo suave */
+border-radius: 8px; /* Bordes redondeados */
+border: 1px solid #ddd; /* Borde gris claro */
+}
+
+#nota-texto {
+width: 100%;
+font-size: 14px;
+border: 1px solid #ddd;
+border-radius: 5px;
+resize: none;
+padding: 10px;
+}
+
+#guardar-nota,
+#eliminar-nota {
+padding: 8px 12px;
+border-radius: 5px;
+border: none;
+cursor: pointer;
+}
+
+#guardar-nota {
+background-color: #007bff;
+color: white;
+margin-right: 5px;
+}
+
+#guardar-nota:hover {
+background-color: #0056b3; /* Color más oscuro al pasar el mouse */
+}
+
+#eliminar-nota {
+background-color: #dc3545;
+color: white;
+}
+
+#eliminar-nota:hover {
+background-color: #a71d2a; /* Color más oscuro al pasar el mouse */
+}
+
+
+
+
+
+#resultados-titulo {
+  color: #004892;
+  font-weight: 700;
+  margin: 0;
+  font-size: 18px;
+}
+
+.resultados-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #e0e8f0;
+}
+
+#stats-bar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 13px;
+  color: #5a6a7a;
+  flex-wrap: wrap;
+}
+
+#stat-total { font-weight: 700; color: #004892; }
+#stat-favoritos { color: #b8860b; font-weight: 600; }
+
+.btn-exportar {
+  padding: 6px 14px;
+  background: #004892;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  transition: background 0.18s;
+}
+
+.btn-exportar:hover { background: #003570; }
+
+.btn-limpiar {
+  padding: 7px 14px;
+  background: #fff;
+  color: #004892;
+  border: 1.5px solid #004892;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+  transition: background 0.18s, color 0.18s;
+}
+
+.btn-limpiar:hover {
+  background: #004892;
+  color: #fff;
+}
+
+
+header {
+  background-color: #004892;
+  color: white;
+  padding: 0;
+}
+
+.header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 28px;
+  gap: 16px;
+}
+
+.header-top h1 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: white;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.header-top #bienvenida {
+  margin: 0;
+  font-size: 14px;
+  opacity: 0.85;
+  flex: 1;
+  text-align: center;
+}
+
+nav {
+  display: flex;
+  gap: 4px;
+  padding: 0 20px 10px;
+  flex-wrap: wrap;
+}
+
+.nav-link {
+  color: rgba(255,255,255,0.82);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 6px;
+  transition: background 0.18s, color 0.18s;
+}
+
+.nav-link:hover,
+.nav-link.active {
+  background-color: rgba(255,255,255,0.18);
+  color: #ffffff;
+}
+
+#cerrar-sesion {
+  padding: 8px 16px;
+  background-color: rgba(255,255,255,0.12);
+  color: white;
+  border: 1px solid rgba(255,255,255,0.35);
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.18s;
+}
+
+#cerrar-sesion:hover {
+  background-color: rgba(220,50,50,0.75);
+  border-color: transparent;
+}
+
+
+
+/* Input global (no sobrescribe filtros) */
+input:not(.filtro-item input) {
+  margin: 16px auto;
+  padding: 10px 14px;
+  width: 90%;
+  max-width: 400px;
+  border: 1px solid #c8d4e3;
+  border-radius: 6px;
+  display: block;
+  font-size: 14px;
+  background-color: #f8fafc;
+  color: #1a2a3a;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.07);
+}
+
+/* Lista de jugadores */
+ul {
+  list-style: none;
+  padding: 0;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* Tarjeta de jugador */
+.jugador-card {
+display: flex;
+justify-content: space-between; /* Espacio entre contenido e información */
+align-items: center; /* Alinea verticalmente */
+padding: 20px;
+background: #f4f4f9;
+margin-bottom: 15px;
+border: 1px solid #ddd;
+border-radius: 10px;
+box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.jugador-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Imagen del jugador */
+.jugador-imagen {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 50%;
+  margin-right: 20px;
+  border: 3px solid #ddd;
+}
+
+/* Contenedor general de filtros */
+#filtros {
+  background: #ffffff;
+  border-bottom: 1px solid #dde4ed;
+  padding: 14px 24px 16px;
+  box-shadow: 0 2px 8px rgba(0,72,146,0.06);
+}
+
+.filtros-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 16px;
+  align-items: flex-end;
+  justify-content: flex-start;
+}
+
+/* Cada filtro individual */
+.filtro-item {
+  display: flex;
+  flex-direction: column;
+  font-size: 13px;
+  min-width: 120px;
+}
+
+.filtro-accion {
+  justify-content: flex-end;
+  min-width: auto;
+}
+
+/* Etiquetas de los filtros */
+.filtro-item label {
+  margin-bottom: 4px;
+  font-weight: 700;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: #004892;
+}
+
+/* Inputs y selects de filtros */
+.filtro-item select,
+.filtro-item input[type="text"],
+.filtro-item input[type="number"] {
+  padding: 7px 10px;
+  font-size: 13px;
+  border: 1px solid #c8d4e3;
+  border-radius: 6px;
+  background-color: #f8fafc;
+  color: #1a2a3a;
+  width: 100%;
+  box-sizing: border-box;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.filtro-item select:focus,
+.filtro-item input:focus {
+  border-color: #004892;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0,72,146,0.12);
+  background-color: #fff;
+}
+
+/* Mantener compatibilidad con IDs directos */
+#estadoFiltro, #posicionOfensivaFiltro, #posicionDefensivaFiltro,
+#favoritosFiltro, #claseFiltro, #ordenarFiltro,
+#alturaMinFiltro, #alturaMaxFiltro, #buscador-nombre {
+  padding: 7px 10px;
+  font-size: 13px;
+  border: 1px solid #c8d4e3;
+  border-radius: 6px;
+  background-color: #f8fafc;
+  color: #1a2a3a;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+#estadoFiltro:focus, #posicionOfensivaFiltro:focus, #posicionDefensivaFiltro:focus,
+#favoritosFiltro:focus, #claseFiltro:focus, #ordenarFiltro:focus,
+#alturaMinFiltro:focus, #alturaMaxFiltro:focus, #buscador-nombre:focus {
+  border-color: #004892;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0,72,146,0.12);
+}
+
+
+
+
+
+/* Estilo responsivo */
+@media (max-width: 768px) {
+  #filtros {
+    flex-direction: column; /* Apila los filtros en pantallas pequeñas */
+    gap: 10px;
+  }
+
+  #estadoFiltro,
+  #pesoMin,
+  #pesoMax,
+  #posicionOfensivaFiltro,
+  #posicionDefensivaFiltro,
+  #claseFiltro {
+    width: 100%; /* Ocupar todo el ancho en pantallas pequeñas */
+  }
+}
+
+
+/* Información del jugador */
+.jugador-info {
+  flex: 1;
+  line-height: 1.8;
+  font-size: 16px;
+  color: black; /* Texto azul */
+}
+
+.jugador-info strong {
+  font-size: 18px;
+  color: black; /* Azul fuerte para el nombre */
+}
+
+/* Footer */
+footer {
+  background-color: #004892 !important;
+  color: #ffffff !important;
+  text-align: center;
+  padding: 14px 0;
+  font-size: 13px;
+  margin-top: 40px;
+}
+
+footer a {
+  color: #ffffff !important; /* Enlaces blancos */
+  text-decoration: none;
+}
+
+footer a:hover {
+  text-decoration: underline;
+}
+
+/* bienvenida ahora vive dentro del header-top */
+#bienvenida-container { display: none; }
+#bienvenida { font-weight: 600; }
+
+#paginacion button {
+  padding: 10px 15px;
+  margin: 5px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  background-color: #004892;
+  color: white;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+#paginacion button.active {
+  background-color: #003366;
+  font-weight: bold;
+}
+
+#paginacion button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+/* Nombre del jugador */
+#info-jugador h2 {
+  color: black; /* Cambiado a azul */
+  text-align: center; /* Opcional: centra el nombre */
+  margin-bottom: 20px;
+}
+
+/* Botones de highlights */
+.highlight-btn {
+  background-color: #004892 !important; /* Fondo azul */
+  color: #ffffff; /* Texto blanco */
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  margin: 10px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.highlight-btn:hover {
+  background-color: #003366 !important; /* Azul más oscuro al pasar el cursor */
+  transform: translateY(-2px); /* Efecto de elevación */
+}
+
+.highlight-btn:active {
+  transform: translateY(1px); /* Efecto de presionado */
+}
+
+a[href="#"] {
+  cursor: not-allowed; /* Indica que el enlace no está activo */
+  color: gray; /* Color para enlaces inactivos */
+}
+
+a {
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+a:hover {
+  color: #003366; /* Cambia el color al pasar el cursor */
+}
+
+#rating {
+  margin-top: 10px;
+  font-size: 18px;
+  color: #FFD700; /* Color dorado para las estrellas */
+}
+
+#rating span {
+  display: inline-block;
+  margin: 0 5px;
+}
+
+
+#ratingFiltro {
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #fff;
+  color: #004892;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  width: 200px;
+}
+
+#estrellas .estrella {
+  font-size: 2rem;
+  color: #ccc;
+  cursor: pointer;
+}
+
+#estrellas .estrella.seleccionada,
+#estrellas .estrella:hover {
+  color: gold;
+}
+
+
+
+
+/* Estilo para el botón de cerrar sesión */
+#cerrar-sesion {
+  background-color: #d9534f; /* Rojo suave */
+  color: white; /* Texto blanco */
+  border: none; /* Sin bordes */
+  padding: 10px 15px; /* Espaciado interno */
+  border-radius: 5px; /* Bordes redondeados */
+  font-size: 14px; /* Tamaño del texto */
+  cursor: pointer; /* Cambia el cursor a mano */
+  font-weight: bold; /* Texto en negrita */
+  transition: background-color 0.3s ease; /* Transición suave */
+}
+
+/* Cambia el color al pasar el ratón */
+#cerrar-sesion:hover {
+  background-color: #c9302c; /* Rojo más oscuro */
+}
+
+/* Deshabilitado */
+#cerrar-sesion:disabled {
+  background-color: #f2a3a1; /* Rojo claro */
+  cursor: not-allowed; /* Cursor deshabilitado */
+}
+
+/* Contenedor general del formulario */
+#formFiltros {
+  display: flex;
+  flex-wrap: wrap; /* Permite ajustar los elementos en varias filas */
+  gap: 20px; /* Espaciado entre los elementos */
+  justify-content: center; /* Centrar los elementos horizontalmente */
+  align-items: center; /* Alinear verticalmente */
+  background-color: #f9f9f9; /* Fondo claro para contraste */
+  padding: 20px; /* Espaciado interno */
+  border: 1px solid #ddd; /* Borde suave */
+  border-radius: 8px; /* Bordes redondeados */
+  max-width: 600px; /* Ancho máximo */
+  margin: 0 auto; /* Centrar el formulario en la página */
+}
+
+/* Contenedor de cada filtro (etiqueta + selector) */
+#formFiltros div {
+  display: flex;
+  flex-direction: column; /* Etiqueta encima del selector */
+  align-items: flex-start;
+  width: 45%; /* Ancho proporcional para dos columnas */
+}
+
+/* Estilo de las etiquetas */
+#formFiltros label {
+  font-weight: bold;
+  color: #004892; /* Azul oscuro */
+  margin-bottom: 5px; /* Espaciado entre la etiqueta y el campo */
+}
+
+/* Estilo de los selectores */
+#formFiltros select {
+  width: 100%; /* Ocupa todo el ancho disponible */
+  padding: 10px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #fff;
+  color: #333;
+}
+
+/* Estilo del botón */
+#formFiltros button {
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+  font-weight: bold;
+  color: #fff;
+  background-color: #007bff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+/* Efecto hover en el botón */
+#formFiltros button:hover {
+  background-color: #0056b3; /* Azul más oscuro */
+}
+
+
+
+/* Contenedor de la lista de jugadores */
+/* Lista de jugadores: Maximiza espacio */
+#lista-jugadores {
+  display: grid; /* Asegura la cuadrícula por defecto */
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+  padding: 10px;
+  justify-items: center;
+  transition: opacity 0.3s ease; /* Transición suave */
+}
+
+#lista-jugadores.hidden {
+  opacity: 0;
+  pointer-events: none; /* Evitar interacciones mientras está oculto */
+}
+
+/* Botón de ocultar/mostrar */
+#toggleListaJugadores {
+  background-color: #004892; /* Fondo azul oscuro */
+  color: #ffffff; /* Texto blanco */
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  display: block; /* Asegura que el botón sea un bloque */
+  margin: 0 auto 20px auto; /* Centra horizontalmente */
+  text-align: center;
+}
+
+/* Efecto hover y clic */
+#toggleListaJugadores:hover {
+  background-color: #003366; /* Azul más oscuro */
+  transform: scale(1.05); /* Aumenta ligeramente */
+}
+
+#toggleListaJugadores:active {
+  background-color: #002244; /* Azul más oscuro */
+  transform: scale(0.95); /* Reduce ligeramente */
+}
+
+/* Estilo para los textos */
+h3, h2 {
+  color: #004892; /* Cambiar el texto a azul */
+  font-weight: bold;
+  text-align: center; /* Centrar el texto */
+  margin-bottom: 20px;
+}
+
+
+/* Cada jugador */
+.jugador-item {
+  display: flex;
+  flex-direction: column; /* Nombre y checkbox en una columna */
+  align-items: center;
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 14px; /* Fuente más pequeña pero legible */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Sombra ligera */
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  text-align: center; /* Centrar el texto */
+}
+
+.jugador-item:hover {
+  background-color: #f5f5f5;
+  transform: scale(1.03); /* Efecto de agrandamiento al pasar el cursor */
+  cursor: pointer;
+}
+
+/* Checkbox */
+.jugador-item input[type="checkbox"] {
+  margin-bottom: 5px;
+}
+
+/* Nombres */
+.jugador-item label {
+  font-size: 14px; /* Tamaño de fuente más compacto */
+  color: #333;
+  font-weight: bold;
+  text-align: center;
+  white-space: normal; /* Permitir que los nombres largos se dividan en varias líneas */
+  word-wrap: break-word; /* Dividir palabras si es necesario */
+}
+
+/* Imagen del jugador */
+.jugador-item img {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  margin-bottom: 10px;
+  border: 2px solid #004892;
+}
+
+
+/* Tabla comparativa */
+/* Estilo general de la tabla */
+.tabla-comparacion {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+  font-size: 18px;
+  text-align: center;
+  background-color: #f9f9f9;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Bordes y separación */
+.tabla-comparacion th, .tabla-comparacion td {
+  border: 1px solid #ddd;
+  padding: 10px;
+}
+
+/* Encabezados de la tabla */
+.tabla-comparacion th {
+  background-color: #004892;
+  color: white;
+  font-weight: bold;
+  text-transform: uppercase;
+  padding: 15px;
+}
+
+/* Alternar colores de las filas */
+.tabla-comparacion tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+.tabla-comparacion tr:hover {
+  background-color: #d1e7f5;
+}
+
+/* Alineación y estilo de imágenes */
+.tabla-comparacion img {
+  width: 100px;
+  height: auto;
+  border-radius: 50%;
+  border: 2px solid #004892;
+}
+
+/* Texto de las celdas */
+.tabla-comparacion td {
+  font-size: 16px;
+  color: #333;
+}
+
+/* Centrar la tabla */
+#tabla-comparacion {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+
+.estrella {
+  font-size: 20px;
+  color: #ccc;
+}
+.estrella.gold {
+  color: gold;
+}
+
+
+/* BOARD */
+
+.jugador-board {
+  display: flex;
+  align-items: center; /* Alinear contenido verticalmente */
+  background-color: #f4f4f4;
+  border: 2px solid #ccc;
+  border-radius: 10px;
+  padding: 15px;
+  margin: 10px 0;
+}
+
+.jugador-board.dragging {
+  opacity: 0.5;
+  cursor: grabbing;
+}
+
+.bigboard-imagen {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  margin-right: 15px;
+  object-fit: cover;
+  border: 2px solid #ddd;
+}
+
+.bigboard-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1; /* Asegura que el contenedor se expanda uniformemente */
+}
+
+.bigboard-info h3 {
+  font-size: 20px;
+  margin: 0 0 5px 0;
+  color: #333;
+  text-align: left; /* Asegurar alineación a la izquierda */
+}
+
+.bigboard-info p {
+  font-size: 14px;
+  margin: 5px 0;
+  color: #666;
+}
+
+.perfil-link {
+  color: #000000;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.perfil-link:hover {
+  text-decoration: underline;
+  color: #0000;
+}
+
+.bigboard-estrellas {
+  display: flex;
+  gap: 5px;
+}
+
+.bigboard-estrellas .estrella {
+  font-size: 24px;
+  color: #FFD700; /* Dorado para todas las estrellas */
+  opacity: 0.5;  /* Transparencia para estrellas vacías */
+  transition: opacity 0.3s ease;
+}
+
+.bigboard-estrellas .estrella.seleccionada {
+  opacity: 1;  /* Totalmente visible para estrellas seleccionadas */
+}
+
+
+/* ROSTER */
+.lista-jugadores.oculto {
+  display: none;
+}
+.oculto {
+  display: none !important;
+}
+
+
+
+.athletic-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  font-size: 16px;
+  text-align: left;
+  color: black;
+}
+
+.athletic-table th, .athletic-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+.athletic-table th {
+  background-color: #004892;
+  color: white;
+  font-weight: bold;
+}
+
+.athletic-table td {
+  text-align: center;
+}
+
+#explicacion {
+  margin-top: 20px;
+  font-size: 14px;
+  color: #555;
+}
+#explicacion h4 {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+#explicacion ul {
+  padding-left: 20px;
+  list-style: disc;
+}
+#explicacion ul li {
+  margin-bottom: 5px;
+}
+
+/* Colores para los puntajes */
+.valor-alto {
+  background-color: #0f0; /* Verde */
+  color: #000;
+  border-radius: 5px;
+  padding: 5px;
+  display: inline-block;
+}
+.valor-medio {
+  background-color: #ff0; /* Amarillo */
+  color: #000;
+  border-radius: 5px;
+  padding: 5px;
+  display: inline-block;
+}
+.valor-bajo {
+  background-color: #f00; /* Rojo */
+  color: #000000;
+  border-radius: 5px;
+  padding: 5px;
+  display: inline-block;
+}
+/* Centrar recuadro en la tabla */
+.celda-puntaje {
+  text-align: center; /* Centrado horizontal */
+  vertical-align: middle; /* Centrado vertical */
+  padding: 0; /* Elimina el espacio interno */
+}
+
+.recuadro-color {
+  display: inline-block; /* Hace que sea como un "caja interna" */
+  width: 60px; /* Tamaño consistente */
+  height: 25px; /* Altura consistente */
+  line-height: 25px; /* Centra el texto verticalmente dentro del recuadro */
+  text-align: center; /* Centrado horizontal */
+  border-radius: 5px; /* Bordes redondeados */
+  color: rgb(0, 0, 0); /* Texto blanco para contraste */
+}
+
+/* =========================
+   CRM - Proceso de admisión
+   ========================= */
+
+#crm-proceso{
+  margin-top: 24px;
+  padding: 18px 18px 22px;
+  border: 1px solid rgba(139,0,0,.25);   /* rojo sutil */
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 4px 12px rgba(0,0,0,.06);
+}
+
+#crm-proceso h3{
+  margin: 0 0 14px 0;
+  color: #8B0000;
+  text-align: center;
+  font-size: 18px;
+}
+
+/* Top row: Etapa / Prioridad / Actualización */
+.crm-top{
+  display: grid;
+  grid-template-columns: 1.2fr .8fr 1fr;
+  gap: 14px;
+  align-items: end;
+  margin-bottom: 14px;
+}
+
+.crm-field label{
+  display: block;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+#crm-proceso select,
+#crm-proceso input[type="text"],
+#crm-proceso textarea{
+  width: 100% !important;          /* evita estilos raros globales */
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border: 1px solid #d6d6d6;
+  border-radius: 10px;
+  background: #fff;
+  outline: none;
+}
+
+#crm-proceso select:focus,
+#crm-proceso input[type="text"]:focus,
+#crm-proceso textarea:focus{
+  border-color: rgba(139,0,0,.45);
+  box-shadow: 0 0 0 3px rgba(139,0,0,.10);
+}
+
+/* Checklist grid */
+#crm-checklist{
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin: 10px 0 16px;
+}
+
+@media (max-width: 980px){
+  #crm-checklist{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 520px){
+  #crm-checklist{ grid-template-columns: 1fr; }
+  .crm-top{ grid-template-columns: 1fr; }
+}
+
+/* Checklist card */
+.crm-check-item{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 12px;
+  border: 1px solid #e2e2e2;
+  border-radius: 12px;
+  background: #fafafa;
+  cursor: pointer;
+  user-select: none;
+  text-align: left;
+  font-weight: 600;
+}
+
+.crm-check-item:hover{
+  background: #f4f4f4;
+  border-color: #d8d8d8;
+}
+
+/* Fix checkbox (evita que se convierta en “barra”) */
+.crm-check-item input[type="checkbox"]{
+  width: 18px !important;
+  height: 18px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: inline-block !important;
+  flex: 0 0 auto;
+}
+
+/* Checked style: tarjeta “activa” */
+.crm-check-item:has(input[type="checkbox"]:checked){
+  background: rgba(139,0,0,.06);
+  border-color: rgba(139,0,0,.25);
+}
+
+/* Notas / Próximo paso */
+.crm-notes{
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+@media (max-width: 980px){
+  .crm-notes{ grid-template-columns: 1fr; }
+}
+
+/* Decision row */
+.crm-decision{
+  display: grid;
+  grid-template-columns: .8fr 2fr;
+  gap: 14px;
+  align-items: end;
+  margin-bottom: 14px;
+}
+
+.crm-actions{
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* Botones */
+#crm-save, #crm-reset{
+  border: none;
+  padding: 10px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+#crm-save{
+  background: #0b3d91;
+  color: #fff;
+}
+
+#crm-reset{
+  background: #e9e9e9;
+  color: #222;
+}
+
+.actions-row{
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.actions-row.secondary{
+  justify-content: flex-end;   /* o center si prefieres */
+}
+
+.actions-row .linkbtn{
+  flex: 1;
+}
+
+
+
+/* Mejoras para móviles */
+@media (max-width: 768px) {
+  input {
+      width: 95%;
+  }
+
+  .jugador-card {
+      flex-direction: column;
+      text-align: center;
+  }
+
+  .jugador-imagen {
+      margin-bottom: 15px;
+  }
+
+  .jugador-info {
+      font-size: 14px;
+  }
+}
+
+/* ===========================
+   Main & Resultados
+   =========================== */
+main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px 20px;
+}
+
+#resultados-container {
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 20px 24px;
+  box-shadow: 0 2px 12px rgba(0,72,146,0.08);
+}
+
+/* Responsive header */
+@media (max-width: 768px) {
+  .header-top {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .header-top h1 { font-size: 16px; }
+  nav { gap: 2px; padding: 0 10px 8px; }
+  .nav-link { font-size: 12px; padding: 5px 10px; }
+  .filtros-grid { gap: 8px; }
+  .filtro-item { min-width: 100px; }
+  #resultados-container { padding: 14px; }
+}

@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prueba Supabase – Reclutamiento</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .prueba-wrap {
+      max-width: 1100px;
+      margin: 28px auto;
+      padding: 0 20px 60px;
+    }
+
+    .prueba-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .prueba-header h2 {
+      color: #004892;
+      font-size: 22px;
+      margin: 0;
+    }
+
+    .badge-status {
+      padding: 5px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.4px;
+    }
+
+    .badge-ok  { background: #e6f4ea; color: #1e7e34; }
+    .badge-err { background: #fdecea; color: #b71c1c; }
+    .badge-loading { background: #e8f0fe; color: #1a73e8; }
+
+    /* Stats strip */
+    .stats-strip {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      background: #fff;
+      border: 1px solid #dde4ed;
+      border-radius: 10px;
+      padding: 14px 22px;
+      min-width: 120px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0,72,146,0.06);
+    }
+
+    .stat-num {
+      font-size: 28px;
+      font-weight: 800;
+      color: #004892;
+      line-height: 1;
+    }
+
+    .stat-label {
+      font-size: 11px;
+      color: #7a8a9a;
+      margin-top: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    /* Búsqueda */
+    .search-bar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+
+    .search-bar input {
+      flex: 1;
+      min-width: 200px;
+      padding: 9px 14px;
+      border: 1px solid #c8d4e3;
+      border-radius: 7px;
+      font-size: 14px;
+      background: #f8fafc;
+      color: #1a2a3a;
+      margin: 0;
+      width: auto;
+    }
+
+    .search-bar select {
+      padding: 9px 12px;
+      border: 1px solid #c8d4e3;
+      border-radius: 7px;
+      font-size: 13px;
+      background: #f8fafc;
+      color: #1a2a3a;
+    }
+
+    .btn-recargar {
+      padding: 9px 18px;
+      background: #004892;
+      color: white;
+      border: none;
+      border-radius: 7px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.18s;
+    }
+
+    .btn-recargar:hover { background: #003570; }
+
+    /* Tabla */
+    .tabla-wrap {
+      overflow-x: auto;
+      border-radius: 10px;
+      box-shadow: 0 2px 12px rgba(0,72,146,0.08);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      font-size: 13px;
+    }
+
+    thead th {
+      background: #004892;
+      color: white;
+      padding: 11px 14px;
+      text-align: left;
+      font-weight: 600;
+      white-space: nowrap;
+      font-size: 12px;
+      letter-spacing: 0.3px;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid #eef1f6;
+      transition: background 0.12s;
+    }
+
+    tbody tr:hover { background: #f0f5ff; }
+
+    tbody td {
+      padding: 10px 14px;
+      color: #1a2a3a;
+      vertical-align: middle;
+    }
+
+    .td-nombre {
+      font-weight: 700;
+      color: #004892;
+    }
+
+    .badge-pos {
+      display: inline-block;
+      padding: 2px 8px;
+      background: #e8f0fe;
+      color: #004892;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .badge-clase {
+      display: inline-block;
+      padding: 2px 8px;
+      background: #f3e5f5;
+      color: #6a1b9a;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #7a8a9a;
+    }
+
+    .empty-state .icon { font-size: 40px; margin-bottom: 12px; }
+
+    #loading-state {
+      text-align: center;
+      padding: 40px;
+      color: #7a8a9a;
+      font-size: 14px;
+    }
+
+    .error-box {
+      background: #fdecea;
+      border: 1px solid #f5c6cb;
+      border-radius: 8px;
+      padding: 16px 20px;
+      color: #b71c1c;
+      font-size: 13px;
+      margin-bottom: 20px;
+    }
+
+    .tag-nuevo {
+      display: inline-block;
+      padding: 2px 8px;
+      background: #e6f4ea;
+      color: #1e7e34;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 700;
+      margin-left: 6px;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-top">
+      <h1>Reclutamiento</h1>
+      <button id="cerrar-sesion">Cerrar sesión</button>
+    </div>
+    <nav>
+      <a href="index.html" class="nav-link">Inicio</a>
+      <a href="graficas.html" class="nav-link">Gráficas</a>
+      <a href="comparador.html" class="nav-link">Comparador</a>
+      <a href="bigboard.html" class="nav-link">Big Board</a>
+      <a href="roster.html" class="nav-link">Roster</a>
+      <a href="procesos.html" class="nav-link">Procesos</a>
+      <a href="tareas.html" class="nav-link">Tareas</a>
+      <a href="prueba.html" class="nav-link active">Prueba DB</a>
+    </nav>
+  </header>
+
+  <div class="prueba-wrap">
+
+    <div class="prueba-header">
+      <div>
+        <h2>Prospectos desde Supabase</h2>
+        <p style="margin:4px 0 0; font-size:13px; color:#7a8a9a;">Datos cargados en tiempo real desde la base de datos</p>
+      </div>
+      <span id="status-badge" class="badge-status badge-loading">⏳ Cargando...</span>
+    </div>
+
+    <div id="error-box" class="error-box" style="display:none;"></div>
+
+    <!-- Stats -->
+    <div class="stats-strip">
+      <div class="stat-card">
+        <div class="stat-num" id="stat-total">—</div>
+        <div class="stat-label">Total prospectos</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="stat-hoy">—</div>
+        <div class="stat-label">Registrados hoy</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="stat-posiciones">—</div>
+        <div class="stat-label">Posiciones distintas</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="stat-estados">—</div>
+        <div class="stat-label">Estados de origen</div>
+      </div>
+    </div>
+
+    <!-- Búsqueda y filtros -->
+    <div class="search-bar">
+      <input type="text" id="buscar" placeholder="🔍 Buscar por nombre, posición, ciudad...">
+      <select id="filtro-pos">
+        <option value="">Todas las posiciones</option>
+        <option>QB</option><option>RB</option><option>FB</option>
+        <option>WR</option><option>TE</option><option>OT</option>
+        <option>OG</option><option>C</option><option>DE</option>
+        <option>DT</option><option>LB</option><option>CB</option>
+        <option>S</option><option>K</option><option>P</option>
+      </select>
+      <select id="filtro-clase">
+        <option value="">Todas las clases</option>
+        <option>2025</option><option>2026</option>
+        <option>2027</option><option>2028</option>
+      </select>
+      <button class="btn-recargar" onclick="cargarJugadores()">↺ Recargar</button>
+    </div>
+
+    <!-- Tabla -->
+    <div class="tabla-wrap">
+      <div id="loading-state">Cargando datos desde Supabase...</div>
+      <table id="tabla-jugadores" style="display:none;">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Nombre</th>
+            <th>Posición</th>
+            <th>Clase</th>
+            <th>Ciudad</th>
+            <th>Estado</th>
+            <th>Estatura</th>
+            <th>Peso</th>
+            <th>40 yds</th>
+            <th>Preparatoria</th>
+            <th>Registrado</th>
+          </tr>
+        </thead>
+        <tbody id="tabla-body"></tbody>
+      </table>
+      <div id="empty-state" class="empty-state" style="display:none;">
+        <div class="icon">🏈</div>
+        <div>No se encontraron prospectos con esos filtros</div>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>
+    <p>&copy; 2025 Reclutamiento MTY — Uso interno</p>
+  </footer>
+
+  <script>
+  </script>
+  <script src="prueba.js"></script>
+</body>
+</html>

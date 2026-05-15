@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <title>Dashboard — Reclutamiento MTY</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* ── Dashboard layout ── */
+    .dashboard {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px 16px 48px;
+    }
+
+    .dashboard-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #1a2a3a;
+      margin: 0 0 20px;
+    }
+
+    /* ── KPI Cards ── */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+
+    @media (max-width: 1024px) { .kpi-grid { grid-template-columns: repeat(3, 1fr); } }
+    @media (max-width: 600px)  { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+
+    .kpi-card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 16px 14px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.08);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .kpi-card.alerta { border-left: 4px solid #dc3545; }
+
+    .kpi-icon { font-size: 1.3rem; line-height: 1; }
+    .kpi-num  { font-size: 2rem; font-weight: 800; color: #004892; line-height: 1.1; }
+    .kpi-lbl  { font-size: 0.72rem; color: #6c757d; font-weight: 500; text-transform: uppercase; letter-spacing: .03em; }
+
+    .kpi-card.alerta .kpi-num { color: #dc3545; }
+
+    /* ── Skeleton shimmer ── */
+    .skeleton {
+      background: linear-gradient(90deg, #e8edf2 25%, #f4f7fa 50%, #e8edf2 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.4s infinite;
+      border-radius: 6px;
+    }
+
+    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+    .kpi-card.loading .kpi-num,
+    .kpi-card.loading .kpi-lbl,
+    .kpi-card.loading .kpi-icon { visibility: hidden; }
+    .kpi-card.loading { position: relative; overflow: hidden; }
+    .kpi-card.loading::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, #e8edf2 25%, #f4f7fa 50%, #e8edf2 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.4s infinite;
+      border-radius: 10px;
+    }
+
+    /* ── Section titles ── */
+    .section-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #1a2a3a;
+      margin: 0 0 12px;
+      padding-bottom: 6px;
+      border-bottom: 2px solid #e2e8f0;
+    }
+
+    /* ── Pipeline ── */
+    .pipeline-card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.08);
+      margin-bottom: 28px;
+    }
+
+    .pipeline-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      cursor: pointer;
+    }
+
+    .pipeline-row:last-child { margin-bottom: 0; }
+
+    .pipeline-label {
+      width: 130px;
+      font-size: 0.82rem;
+      color: #1a2a3a;
+      font-weight: 500;
+      flex-shrink: 0;
+    }
+
+    .pipeline-track {
+      flex: 1;
+      background: #e9ecef;
+      border-radius: 4px;
+      height: 14px;
+      overflow: hidden;
+    }
+
+    .pipeline-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width .4s ease;
+      min-width: 4px;
+    }
+
+    .pipeline-count {
+      width: 28px;
+      text-align: right;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #495057;
+    }
+
+    /* ── Two-column section ── */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 28px;
+    }
+
+    @media (max-width: 768px) { .two-col { grid-template-columns: 1fr; } }
+
+    .panel-card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.08);
+    }
+
+    .player-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 0;
+      border-bottom: 1px solid #f1f3f5;
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .player-row:last-child { border-bottom: none; }
+    .player-row:hover { background: #f8fafc; border-radius: 6px; }
+
+    .player-name {
+      flex: 1;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #1a2a3a;
+    }
+
+    .player-meta {
+      font-size: 0.75rem;
+      color: #6c757d;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: #fff;
+      white-space: nowrap;
+    }
+
+    .badge-decision {
+      background: #6c757d;
+      color: #fff;
+    }
+
+    /* ── Position pills ── */
+    .pos-section {
+      background: #fff;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.08);
+      margin-bottom: 28px;
+    }
+
+    .pos-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .pos-pill {
+      padding: 5px 14px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #fff;
+      cursor: pointer;
+    }
+
+    .pos-pill:hover { opacity: .85; }
+
+    /* ── Quick access ── */
+    .quick-access {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    @media (max-width: 600px) { .quick-access { grid-template-columns: repeat(2, 1fr); } }
+
+    .qa-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      padding: 20px 12px;
+      background: #fff;
+      border: none;
+      border-radius: 10px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.08);
+      cursor: pointer;
+      text-decoration: none;
+      color: #1a2a3a;
+      font-weight: 600;
+      font-size: 0.88rem;
+      transition: transform .15s, box-shadow .15s;
+    }
+
+    .qa-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,.12); }
+    .qa-btn span { font-size: 1.6rem; }
+
+    /* ── Empty state ── */
+    .empty { color: #adb5bd; font-size: 0.85rem; padding: 12px 0; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-top">
+      <h1>Reclutamiento</h1>
+      <p id="bienvenida"></p>
+      <button id="cerrar-sesion">Cerrar sesión</button>
+    </div>
+    <nav>
+      <a href="index.html" class="nav-link active">Inicio</a>
+      <a href="prospectos.html" class="nav-link">Prospectos</a>
+      <a href="bigboard.html" class="nav-link">Big Board</a>
+      <a href="roster.html" class="nav-link">Roster</a>
+      <a href="procesos.html" class="nav-link">Procesos</a>
+      <a href="tareas.html" class="nav-link">Tareas</a>
+    </nav>
+  </header>
+
+  <main>
+    <div class="dashboard">
+
+      <p class="dashboard-title">Dashboard</p>
+
+      <!-- KPI Cards -->
+      <div class="kpi-grid" id="kpi-grid">
+        <div class="kpi-card loading"><div class="kpi-icon">👥</div><div class="kpi-num">—</div><div class="kpi-lbl">Total Prospectos</div></div>
+        <div class="kpi-card loading"><div class="kpi-icon">⭐</div><div class="kpi-num">—</div><div class="kpi-lbl">Favoritos</div></div>
+        <div class="kpi-card loading"><div class="kpi-icon">⚡</div><div class="kpi-num">—</div><div class="kpi-lbl">En Proceso</div></div>
+        <div class="kpi-card loading"><div class="kpi-icon">✅</div><div class="kpi-num">—</div><div class="kpi-lbl">Admitidos</div></div>
+        <div class="kpi-card loading"><div class="kpi-icon">🔴</div><div class="kpi-num">—</div><div class="kpi-lbl">Sin Contacto 7d</div></div>
+        <div class="kpi-card loading"><div class="kpi-icon">🎯</div><div class="kpi-num">—</div><div class="kpi-lbl">Prioridad A</div></div>
+      </div>
+
+      <!-- Pipeline -->
+      <div class="pipeline-card">
+        <div class="section-title">Pipeline por Etapa</div>
+        <div id="pipeline-rows"></div>
+      </div>
+
+      <!-- Actividad reciente + Prioridad alta -->
+      <div class="two-col">
+        <div class="panel-card">
+          <div class="section-title">Actividad Reciente</div>
+          <div id="actividad-lista"></div>
+        </div>
+        <div class="panel-card">
+          <div class="section-title">Prioridad Alta</div>
+          <div id="prioridad-lista"></div>
+        </div>
+      </div>
+
+      <!-- Distribución por posición -->
+      <div class="pos-section">
+        <div class="section-title">Distribución por Posición</div>
+        <div class="pos-pills" id="pos-pills"></div>
+      </div>
+
+      <!-- Accesos rápidos -->
+      <div class="quick-access">
+        <a href="prospectos.html" class="qa-btn"><span>📋</span>Prospectos</a>
+        <a href="bigboard.html"   class="qa-btn"><span>📊</span>Big Board</a>
+        <a href="procesos.html"   class="qa-btn"><span>🔄</span>Procesos</a>
+        <a href="tareas.html"     class="qa-btn"><span>✅</span>Tareas</a>
+      </div>
+
+    </div>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Reclutamiento MTY — Uso interno</p>
+  </footer>
+
+  <script src="config.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

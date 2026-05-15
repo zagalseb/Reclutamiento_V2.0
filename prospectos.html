@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <title>Prospectos — Reclutamiento MTY</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+
+    /* ── Search strip (full-width, buscador alineado a la derecha) ── */
+    .p-search-strip {
+      background: #fff;
+      border-bottom: 1px solid #dde4ed;
+      padding: 12px 28px;
+      box-shadow: 0 2px 8px rgba(0,72,146,0.06);
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+    }
+
+    .p-search-wrap {
+      position: relative;
+      width: 320px;
+    }
+
+    .p-search-wrap svg {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #7a8a9a;
+      pointer-events: none;
+    }
+
+    .p-search-wrap input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 9px 14px 9px 34px;
+      font-size: 14px;
+      border: 1.5px solid #c8d4e3;
+      border-radius: 8px;
+      background: #f8fafc;
+      color: #1a2a3a;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .p-search-wrap input:focus {
+      border-color: #004892;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(0,72,146,0.12);
+      background: #fff;
+    }
+
+    /* ── Two-column layout ── */
+    .prospectos-layout {
+      max-width: 1360px;
+      margin: 0 auto;
+      padding: 24px 20px;
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+    }
+
+    /* ── Sidebar ── */
+    .p-sidebar {
+      width: 210px;
+      flex-shrink: 0;
+      background: #fff;
+      border-radius: 10px;
+      padding: 20px 16px 24px;
+      box-shadow: 0 2px 12px rgba(0,72,146,0.08);
+      /* Stack vertically — new filters just go below */
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .p-sidebar-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: #7a8a9a;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #edf2f7;
+      margin-bottom: -4px;
+    }
+
+    /* Each filter item in sidebar */
+    .pf-item {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .pf-item label {
+      font-weight: 700;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      color: #004892;
+    }
+
+    .pf-item select {
+      padding: 7px 10px;
+      font-size: 13px;
+      border: 1px solid #c8d4e3;
+      border-radius: 6px;
+      background: #f8fafc;
+      color: #1a2a3a;
+      width: 100%;
+      box-sizing: border-box;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .pf-item select:focus {
+      border-color: #004892;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(0,72,146,0.12);
+      background: #fff;
+    }
+
+    .pf-dropdown {
+      position: relative;
+      width: 100%;
+    }
+
+    .pf-dd-btn {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 7px 10px;
+      font-size: 13px;
+      border: 1px solid #c8d4e3;
+      border-radius: 6px;
+      background: #f8fafc;
+      color: #1a2a3a;
+      cursor: pointer;
+      transition: border-color 0.15s;
+      font-family: inherit;
+    }
+
+    .pf-dd-btn:hover,
+    .pf-dd-btn.open {
+      border-color: #004892;
+      background: #fff;
+    }
+
+    .pf-dd-btn.has-selection {
+      border-color: #004892;
+      background: #eef4fb;
+      color: #004892;
+      font-weight: 700;
+    }
+
+    .pf-dd-panel {
+      display: none;
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      right: 0;
+      background: #fff;
+      border: 1px solid #c8d4e3;
+      border-radius: 8px;
+      box-shadow: 0 4px 16px rgba(0,72,146,0.12);
+      z-index: 200;
+      padding: 6px;
+      min-width: 100%;
+    }
+
+    .pf-dd-panel.open {
+      display: block;
+    }
+
+    .pf-dd-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 8px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 12px;
+      color: #1a2a3a;
+      transition: background 0.1s;
+      user-select: none;
+      white-space: nowrap;
+    }
+
+    .pf-dd-option:hover {
+      background: #eef4fb;
+    }
+
+    .pf-dd-option input[type="checkbox"] {
+      accent-color: #004892;
+      width: 13px;
+      height: 13px;
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+
+    .pf-dd-option.selected {
+      color: #004892;
+      font-weight: 600;
+    }
+
+    /* ── Main content area ── */
+    .p-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    /* ── Table card ── */
+    .prospectos-card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 20px 24px;
+      box-shadow: 0 2px 12px rgba(0,72,146,0.08);
+    }
+
+    .prospectos-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #e0e8f0;
+    }
+
+    #p-titulo {
+      color: #004892;
+      font-weight: 700;
+      margin: 0;
+      font-size: 18px;
+    }
+
+    .p-meta {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-size: 13px;
+      color: #5a6a7a;
+      flex-wrap: wrap;
+    }
+
+    #p-total { font-weight: 700; color: #004892; }
+
+    /* ── Per-page toggle ── */
+    .toggle-group { display: flex; gap: 4px; }
+
+    .toggle-btn {
+      padding: 5px 12px;
+      font-size: 12px;
+      font-weight: 700;
+      border: 1.5px solid #c8d4e3;
+      border-radius: 6px;
+      background: #f8fafc;
+      color: #5a6a7a;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .toggle-btn.active {
+      background: #004892;
+      border-color: #004892;
+      color: #fff;
+    }
+
+    /* ── Table ── */
+    .prospectos-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    .prospectos-table th {
+      background: #004892;
+      color: #fff;
+      padding: 10px 12px;
+      text-align: left;
+      font-weight: 700;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      white-space: nowrap;
+    }
+
+    .prospectos-table th:first-child { border-radius: 6px 0 0 0; }
+    .prospectos-table th:last-child  { border-radius: 0 6px 0 0; }
+
+    .prospectos-table td {
+      padding: 9px 12px;
+      border-bottom: 1px solid #edf2f7;
+      color: #1a2a3a;
+      white-space: nowrap;
+    }
+
+    .prospectos-table tbody tr {
+      cursor: pointer;
+      transition: background 0.12s;
+    }
+
+    .prospectos-table tbody tr:hover { background: #eef4fb; }
+    .prospectos-table tbody tr:last-child td { border-bottom: none; }
+
+    /* ── Stars ── */
+    .stars       { color: #e0c000; letter-spacing: -1px; font-size: 13px; }
+    .stars-empty { color: #d0d8e0; }
+
+    /* ── CRM badges ── */
+    .crm-badge {
+      display: inline-block;
+      padding: 2px 9px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .crm-nuevo         { background: #e9ecef; color: #495057; }
+    .crm-evaluando     { background: #cfe2ff; color: #0a4b9a; }
+    .crm-contactado    { background: #fff3cd; color: #856404; }
+    .crm-interesado    { background: #d1e7dd; color: #0a5038; }
+    .crm-tryout        { background: #ffe5cc; color: #8a3e00; }
+    .crm-oferta        { background: #e8d5f5; color: #5a1282; }
+    .crm-admitido      { background: #0a5038; color: #fff; }
+    .crm-no-interesado { background: #f8d7da; color: #842029; }
+
+    /* ── Pagination ── */
+    .pagination {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 6px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+
+    .pagination button {
+      padding: 6px 12px;
+      border: 1.5px solid #c8d4e3;
+      border-radius: 6px;
+      background: #f8fafc;
+      color: #004892;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .pagination button.active    { background: #004892; border-color: #004892; color: #fff; }
+    .pagination button:hover:not(.active):not(:disabled) { background: #eef4fb; border-color: #004892; }
+    .pagination button:disabled  { opacity: 0.4; cursor: default; }
+
+    /* ── Loading / empty states ── */
+    .loading-state,
+    .empty-state {
+      text-align: center;
+      padding: 48px 24px;
+      color: #7a8a9a;
+    }
+
+    .loading-state .spinner {
+      width: 36px;
+      height: 36px;
+      border: 3px solid #e0e8f0;
+      border-top-color: #004892;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin: 0 auto 14px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .empty-state .empty-icon { font-size: 42px; margin-bottom: 12px; }
+    .empty-state h3 { color: #004892; margin: 0 0 6px; font-size: 16px; }
+
+    /* ── Responsive ── */
+    @media (max-width: 860px) {
+      .prospectos-layout { flex-direction: column; }
+      .p-sidebar { width: 100%; flex-direction: row; flex-wrap: wrap; gap: 12px 16px; padding: 14px 16px; }
+      .p-sidebar-title { width: 100%; margin-bottom: 0; }
+      .pf-item { min-width: 140px; flex: 1; }
+      .p-search-wrap { width: 100%; }
+    }
+
+    @media (max-width: 600px) {
+      .prospectos-table { font-size: 12px; }
+      .prospectos-table th, .prospectos-table td { padding: 7px 8px; }
+    }
+
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-top">
+      <h1>Reclutamiento</h1>
+      <p id="bienvenida"></p>
+      <button id="cerrar-sesion">Cerrar sesión</button>
+    </div>
+    <nav>
+      <a href="index.html" class="nav-link">Inicio</a>
+      <a href="prospectos.html" class="nav-link active">Prospectos</a>
+      <a href="bigboard.html" class="nav-link">Big Board</a>
+      <a href="roster.html" class="nav-link">Roster</a>
+      <a href="procesos.html" class="nav-link">Procesos</a>
+      <a href="tareas.html" class="nav-link">Tareas</a>
+    </nav>
+  </header>
+
+  <!-- Buscador superior derecho -->
+  <div class="p-search-strip">
+    <div class="p-search-wrap">
+      <svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="9" cy="9" r="7"/><line x1="16" y1="16" x2="12.5" y2="12.5"/>
+      </svg>
+      <input type="text" id="f-buscar" placeholder="Buscar prospecto por nombre...">
+    </div>
+  </div>
+
+  <!-- Layout: sidebar + contenido principal -->
+  <div class="prospectos-layout">
+
+    <!-- Sidebar de filtros -->
+    <aside class="p-sidebar">
+      <div class="p-sidebar-title">Filtros</div>
+
+      <div class="pf-item">
+        <label for="f-posicion">Posición</label>
+        <select id="f-posicion">
+          <option value="">Todas</option>
+          <option>QB</option><option>RB</option><option>FB</option>
+          <option>WR</option><option>TE</option><option>OT</option>
+          <option>OG</option><option>C</option><option>DL</option>
+          <option>LB</option><option>CB</option><option>S</option>
+        </select>
+      </div>
+
+      <div class="pf-item">
+        <label for="f-clase">Clase</label>
+        <select id="f-clase">
+          <option value="">Todas</option>
+          <option>2025</option>
+          <option>2026</option>
+          <option>2027</option>
+          <option>2028</option>
+        </select>
+      </div>
+
+      <div class="pf-item">
+        <label for="f-estado">Estado</label>
+        <select id="f-estado">
+          <option value="">Todos</option>
+          <option>Aguascalientes</option><option>Baja California</option>
+          <option>Baja California Sur</option><option>Campeche</option>
+          <option>Chiapas</option><option>Chihuahua</option>
+          <option>Ciudad de México</option><option>Coahuila</option>
+          <option>Colima</option><option>Durango</option>
+          <option>Estado de México</option><option>Guanajuato</option>
+          <option>Guerrero</option><option>Hidalgo</option>
+          <option>Jalisco</option><option>Michoacán</option>
+          <option>Morelos</option><option>Nayarit</option>
+          <option>Nuevo León</option><option>Oaxaca</option>
+          <option>Puebla</option><option>Querétaro</option>
+          <option>Quintana Roo</option><option>San Luis Potosí</option>
+          <option>Sinaloa</option><option>Sonora</option>
+          <option>Tabasco</option><option>Tamaulipas</option>
+          <option>Tlaxcala</option><option>Veracruz</option>
+          <option>Yucatán</option><option>Zacatecas</option>
+        </select>
+      </div>
+
+      <!-- Filtro Etapa -->
+      <div class="pf-item">
+        <label>Etapa</label>
+        <div class="pf-dropdown" id="dd-etapa">
+          <button class="pf-dd-btn" type="button">
+            <span class="pf-dd-label">Todas</span>
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </button>
+          <div class="pf-dd-panel" id="dd-etapa-panel"></div>
+        </div>
+      </div>
+
+      <!-- Filtro Decisión -->
+      <div class="pf-item">
+        <label>Decisión</label>
+        <div class="pf-dropdown" id="dd-decision">
+          <button class="pf-dd-btn" type="button">
+            <span class="pf-dd-label">Todas</span>
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </button>
+          <div class="pf-dd-panel" id="dd-decision-panel"></div>
+        </div>
+      </div>
+
+      <button class="btn-limpiar" id="btn-limpiar" style="margin-top:4px;">✕ Limpiar</button>
+    </aside>
+
+    <!-- Contenido principal: tabla -->
+    <div class="p-content">
+      <div class="prospectos-card">
+
+        <div class="prospectos-header">
+          <h2 id="p-titulo">Prospectos</h2>
+          <div class="p-meta">
+            <span id="p-total"></span>
+            <div class="toggle-group" id="per-page-toggle">
+              <button class="toggle-btn active" data-n="10">10</button>
+              <button class="toggle-btn" data-n="25">25</button>
+              <button class="toggle-btn" data-n="50">50</button>
+              <button class="toggle-btn" data-n="all">Todos</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="table-wrap">
+          <div class="loading-state" id="loading">
+            <div class="spinner"></div>
+            <p>Cargando prospectos...</p>
+          </div>
+
+          <table class="prospectos-table" id="p-table" style="display:none;">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Nombre</th>
+                <th>Posición</th>
+                <th>Estado</th>
+                <th>Altura</th>
+                <th>Peso</th>
+                <th>40 yds</th>
+                <th>Calificación</th>
+                <th>Etapa</th>
+              </tr>
+            </thead>
+            <tbody id="p-tbody"></tbody>
+          </table>
+
+          <div class="empty-state" id="empty" style="display:none;">
+            <div class="empty-icon">🏈</div>
+            <h3>Sin prospectos</h3>
+            <p>No hay resultados para los filtros seleccionados.</p>
+          </div>
+        </div>
+
+        <div class="pagination" id="pagination"></div>
+
+      </div>
+    </div>
+
+  </div><!-- /prospectos-layout -->
+
+  <footer>
+    <p>&copy; 2025 Reclutamiento MTY — Uso interno</p>
+  </footer>
+
+  <script>
+
+    const u = localStorage.getItem("usuarioActual") || "";
+    const bienvenida = document.getElementById("bienvenida");
+    if (bienvenida && u) bienvenida.textContent = u;
+  </script>
+  <script src="config.js"></script>
+  <script src="prospectos.js"></script>
+</body>
+</html>
