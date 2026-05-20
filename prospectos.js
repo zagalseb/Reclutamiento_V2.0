@@ -108,6 +108,8 @@
         const p = (j.posicion || "").toUpperCase();
         if (pos === "OL") {
           if (!["OT","OG","C"].includes(p)) return false;
+        } else if (pos === "DB") {
+          if (!["CB","S"].includes(p)) return false;
         } else {
           if (p !== pos.toUpperCase()) return false;
         }
