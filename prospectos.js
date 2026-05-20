@@ -104,7 +104,14 @@
     const decisionesSeleccionadas = getChecked("dd-decision-panel");
 
     filtered = allJugadores.filter(j => {
-      if (pos   && (j.posicion || "").toLowerCase() !== pos)   return false;
+      if (pos) {
+        const p = (j.posicion || "").toUpperCase();
+        if (pos === "OL") {
+          if (!["OT","OG","C"].includes(p)) return false;
+        } else {
+          if (p !== pos.toUpperCase()) return false;
+        }
+      }
       if (clase  && String(j.clase || "") !== clase)                      return false;
       if (estado && (j.estado || "").toLowerCase() !== estado)            return false;
       if (q     && !fullName(j).toLowerCase().includes(q))               return false;
