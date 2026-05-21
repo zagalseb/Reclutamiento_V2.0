@@ -45,7 +45,7 @@
 
     while (true) {
       const url = `${SUPABASE_URL}/rest/v1/${TABLE}` +
-        `?select=id,nombre,posicion,estado,altura,peso,cuarenta_yardas,calificacion,favorito,procesos(etapa)` +
+        `?select=id,nombre,posicion,estado,altura,peso,cuarenta_yardas,calificacion,favorito,semestre_prepa,procesos(etapa)` +
         `&order=nombre.asc` +
         `&offset=${from}&limit=${pageSize}`;
 
@@ -114,7 +114,7 @@
           if (p !== pos.toUpperCase()) return false;
         }
       }
-      if (clase  && String(j.clase || "") !== clase)                      return false;
+      if (clase  && String(j.semestre_prepa || "") !== clase)             return false;
       if (estado && (j.estado || "").toLowerCase() !== estado)            return false;
       if (q     && !fullName(j).toLowerCase().includes(q))               return false;
       if (etapasSeleccionadas.length > 0) {
@@ -174,9 +174,9 @@
           <td><strong>${esc(fullName(j))}</strong></td>
           <td>${esc(j.posicion || "—")}</td>
           <td>${esc(j.estado || "—")}</td>
-          <td>${j.altura ? esc(j.altura) + " m" : "—"}</td>
+          <td>${j.altura ? parseFloat(j.altura).toFixed(2) + " m" : "—"}</td>
           <td>${j.peso ? esc(j.peso) + " kg" : "—"}</td>
-          <td>${j.cuarenta_yardas ? esc(j.cuarenta_yardas) + "s" : "—"}</td>
+          <td>${j.cuarenta_yardas ? parseFloat(j.cuarenta_yardas).toFixed(2) + "s" : "—"}</td>
           <td>${stars(j.calificacion)}</td>
           <td>${crmBadge(j)}</td>
         </tr>`;

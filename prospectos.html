@@ -409,6 +409,12 @@
       <a href="roster.html" class="nav-link">Roster</a>
       <a href="procesos.html" class="nav-link">Procesos</a>
       <a href="tareas.html" class="nav-link">Tareas</a>
+      <div class="nav-dropdown" id="nav-otros">
+        <button class="nav-dropdown-btn">Otros ▼</button>
+        <div class="nav-dropdown-menu">
+          <a href="tryout.html">Tryout</a>
+        </div>
+      </div>
     </nav>
   </header>
 
@@ -441,13 +447,15 @@
       </div>
 
       <div class="pf-item">
-        <label for="f-clase">Clase</label>
+        <label for="f-clase">Semestre</label>
         <select id="f-clase">
-          <option value="">Todas</option>
-          <option>2025</option>
-          <option>2026</option>
-          <option>2027</option>
-          <option>2028</option>
+          <option value="">Todos</option>
+          <option>1ro</option>
+          <option>2do</option>
+          <option>3ro</option>
+          <option>4to</option>
+          <option>5to</option>
+          <option>6to</option>
         </select>
       </div>
 
@@ -571,5 +579,15 @@
   </script>
   <script src="config.js"></script>
   <script src="prospectos.js"></script>
+  <script>
+    document.getElementById("nav-otros").addEventListener("click", function(e) {
+      e.stopPropagation();
+      this.classList.toggle("open");
+    });
+    document.addEventListener("click", function() {
+      const d = document.getElementById("nav-otros");
+      if (d) d.classList.remove("open");
+    });
+  </script>
 </body>
 </html>
