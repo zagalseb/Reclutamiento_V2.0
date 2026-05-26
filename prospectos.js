@@ -185,6 +185,7 @@
     // Row click → profile
     tbody.querySelectorAll("tr").forEach(row => {
       row.addEventListener("click", () => {
+        guardarFiltros();
         window.location.href = `perfil.html?id=${encodeURIComponent(row.dataset.id)}`;
       });
     });
@@ -256,6 +257,7 @@
   fBuscar.addEventListener("input", applyFilters);
 
   btnLimpiar.addEventListener("click", () => {
+    sessionStorage.removeItem("prospectos_filtros");
     fPosicion.value = "";
     fClase.value    = "";
     fEstado.value   = "";
@@ -270,6 +272,70 @@
       .forEach(b => b.classList.remove("has-selection"));
     applyFilters();
   });
+
+  // ── Filter persistence ─────────────────────────────
+  function guardarFiltros() {
+    const estado = {
+      posicion:   fPosicion.value,
+      clase:      fClase.value,
+      estado:     fEstado.value,
+      buscar:     fBuscar.value,
+      etapas:     getChecked("dd-etapa-panel"),
+      decisiones: getChecked("dd-decision-panel"),
+      perPage:    perPage,
+      currentPage: currentPage,
+    };
+    sessionStorage.setItem("prospectos_filtros", JSON.stringify(estado));
+  }
+
+  function restaurarFiltros() {
+    const raw = sessionStorage.getItem("prospectos_filtros");
+    if (!raw) return;
+    const s = JSON.parse(raw);
+
+    fPosicion.value = s.posicion || "";
+    fClase.value    = s.clase    || "";
+    fEstado.value   = s.estado   || "";
+    fBuscar.value   = s.buscar   || "";
+
+    function restoreDropdown(panelId, ddId, values) {
+      const panel = document.getElementById(panelId);
+      const dd    = document.getElementById(ddId);
+      const btn   = dd.querySelector(".pf-dd-btn");
+      const label = btn.querySelector(".pf-dd-label");
+
+      panel.querySelectorAll(".pf-dd-check").forEach(cb => {
+        cb.checked = values.includes(cb.value);
+      });
+      panel.querySelectorAll(".pf-dd-option").forEach(opt => {
+        opt.classList.toggle("selected", opt.querySelector("input").checked);
+      });
+
+      const selected = values.filter(v => panel.querySelector(`.pf-dd-check[value="${CSS.escape(v)}"]`));
+      if (selected.length === 0) {
+        label.textContent = "Todas";
+        btn.classList.remove("has-selection");
+      } else if (selected.length === 1) {
+        label.textContent = selected[0];
+        btn.classList.add("has-selection");
+      } else {
+        label.textContent = `${selected.length} seleccionadas`;
+        btn.classList.add("has-selection");
+      }
+    }
+
+    restoreDropdown("dd-etapa-panel",    "dd-etapa",    s.etapas     || []);
+    restoreDropdown("dd-decision-panel", "dd-decision", s.decisiones || []);
+
+    perPage = s.perPage === "all" ? "all" : (s.perPage || 10);
+    toggleGrp.querySelectorAll(".toggle-btn").forEach(btn => {
+      const n = btn.dataset.n;
+      const val = n === "all" ? "all" : parseInt(n, 10);
+      btn.classList.toggle("active", val === perPage);
+    });
+
+    currentPage = s.currentPage || 1;
+  }
 
   // ── Dropdown builders ──────────────────────────────
   function getChecked(panelId) {
@@ -339,6 +405,7 @@
     try {
       allJugadores = await fetchAll();
       loading.style.display = "none";
+      restaurarFiltros();
       applyFilters();
     } catch (err) {
       loading.innerHTML = `
