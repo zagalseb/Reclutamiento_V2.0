@@ -31,11 +31,14 @@
   const pagination= document.getElementById("pagination");
   const toggleGrp = document.getElementById("per-page-toggle");
 
-  const fPosicion = document.getElementById("f-posicion");
-  const fClase    = document.getElementById("f-clase");
-  const fEstado   = document.getElementById("f-estado");
-  const fBuscar   = document.getElementById("f-buscar");
-  const btnLimpiar= document.getElementById("btn-limpiar");
+  const fPosicion  = document.getElementById("f-posicion");
+  const fAlturaMin = document.getElementById("f-altura-min");
+  const fPesoMin   = document.getElementById("f-peso-min");
+  const fClase     = document.getElementById("f-clase");
+  const fAnio      = document.getElementById("f-anio");
+  const fEstado    = document.getElementById("f-estado");
+  const fBuscar    = document.getElementById("f-buscar");
+  const btnLimpiar = document.getElementById("btn-limpiar");
 
   // ── Supabase fetch ─────────────────────────────────
   async function fetchAll() {
@@ -45,7 +48,7 @@
 
     while (true) {
       const url = `${SUPABASE_URL}/rest/v1/${TABLE}` +
-        `?select=id,nombre,posicion,estado,altura,peso,cuarenta_yardas,calificacion,favorito,semestre_prepa,procesos(etapa)` +
+        `?select=id,nombre,posicion,estado,altura,peso,cuarenta_yardas,calificacion,favorito,semestre_prepa,fecha_nacimiento,procesos(etapa)` +
         `&order=nombre.asc` +
         `&offset=${from}&limit=${pageSize}`;
 
@@ -95,10 +98,13 @@
 
   // ── Filter ─────────────────────────────────────────
   function applyFilters() {
-    const pos    = fPosicion.value.trim().toLowerCase();
-    const clase  = fClase.value.trim();
-    const estado = fEstado.value.trim().toLowerCase();
-    const q      = fBuscar.value.trim().toLowerCase();
+    const pos       = fPosicion.value.trim().toLowerCase();
+    const alturaMin = fAlturaMin.value.trim();
+    const pesoMin   = fPesoMin.value.trim();
+    const clase     = fClase.value.trim();
+    const anio      = fAnio.value.trim();
+    const estado    = fEstado.value.trim().toLowerCase();
+    const q         = fBuscar.value.trim().toLowerCase();
 
     const etapasSeleccionadas     = getChecked("dd-etapa-panel");
     const decisionesSeleccionadas = getChecked("dd-decision-panel");
@@ -114,7 +120,10 @@
           if (p !== pos.toUpperCase()) return false;
         }
       }
+      if (alturaMin && parseFloat(j.altura || 0) < parseFloat(alturaMin)) return false;
+      if (pesoMin   && parseFloat(j.peso   || 0) < parseFloat(pesoMin))   return false;
       if (clase  && String(j.semestre_prepa || "") !== clase)             return false;
+      if (anio   && (j.fecha_nacimiento || "").slice(0, 4) !== anio)     return false;
       if (estado && (j.estado || "").toLowerCase() !== estado)            return false;
       if (q     && !fullName(j).toLowerCase().includes(q))               return false;
       if (etapasSeleccionadas.length > 0) {
@@ -177,6 +186,7 @@
           <td>${j.altura ? parseFloat(j.altura).toFixed(2) + " m" : "—"}</td>
           <td>${j.peso ? esc(j.peso) + " kg" : "—"}</td>
           <td>${j.cuarenta_yardas ? parseFloat(j.cuarenta_yardas).toFixed(2) + "s" : "—"}</td>
+          <td>${j.fecha_nacimiento ? esc(j.fecha_nacimiento.slice(0, 4)) : "—"}</td>
           <td>${stars(j.calificacion)}</td>
           <td>${crmBadge(j)}</td>
         </tr>`;
@@ -253,15 +263,18 @@
   });
 
   // ── Filter listeners ───────────────────────────────
-  [fPosicion, fClase, fEstado].forEach(el => el.addEventListener("change", applyFilters));
+  [fPosicion, fAlturaMin, fPesoMin, fClase, fAnio, fEstado].forEach(el => el.addEventListener("change", applyFilters));
   fBuscar.addEventListener("input", applyFilters);
 
   btnLimpiar.addEventListener("click", () => {
     sessionStorage.removeItem("prospectos_filtros");
-    fPosicion.value = "";
-    fClase.value    = "";
-    fEstado.value   = "";
-    fBuscar.value   = "";
+    fPosicion.value  = "";
+    fAlturaMin.value = "";
+    fPesoMin.value   = "";
+    fClase.value     = "";
+    fAnio.value      = "";
+    fEstado.value    = "";
+    fBuscar.value    = "";
     ["dd-etapa-panel", "dd-decision-panel"].forEach(id => {
       document.querySelectorAll(`#${id} .pf-dd-check`)
         .forEach(cb => cb.checked = false);
@@ -277,7 +290,10 @@
   function guardarFiltros() {
     const estado = {
       posicion:   fPosicion.value,
+      alturaMin:  fAlturaMin.value,
+      pesoMin:    fPesoMin.value,
       clase:      fClase.value,
+      anio:       fAnio.value,
       estado:     fEstado.value,
       buscar:     fBuscar.value,
       etapas:     getChecked("dd-etapa-panel"),
@@ -293,10 +309,13 @@
     if (!raw) return;
     const s = JSON.parse(raw);
 
-    fPosicion.value = s.posicion || "";
-    fClase.value    = s.clase    || "";
-    fEstado.value   = s.estado   || "";
-    fBuscar.value   = s.buscar   || "";
+    fPosicion.value  = s.posicion  || "";
+    fAlturaMin.value = s.alturaMin || "";
+    fPesoMin.value   = s.pesoMin   || "";
+    fClase.value     = s.clase     || "";
+    fAnio.value      = s.anio      || "";
+    fEstado.value    = s.estado    || "";
+    fBuscar.value    = s.buscar    || "";
 
     function restoreDropdown(panelId, ddId, values) {
       const panel = document.getElementById(panelId);
