@@ -336,6 +336,93 @@
     #save-msg.ok  { color: #0a5038; }
     #save-msg.err { color: #842029; }
 
+    /* Botón enviar carta */
+    .carta-btn {
+      padding: 8px 18px;
+      border-radius: 7px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      border: 1.5px solid #004892;
+      background: #f8fafc;
+      color: #004892;
+      transition: all 0.15s;
+    }
+    .carta-btn:hover { background: #004892; color: #fff; }
+
+    /* Modal overlay */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-box {
+      background: #fff;
+      border-radius: 12px;
+      padding: 28px 32px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+    }
+    .modal-box h3 { margin: 0 0 6px; font-size: 17px; color: #004892; }
+    .modal-destinatario { font-size: 13px; color: #5a6a7a; margin-bottom: 20px; }
+    .modal-field { margin-bottom: 16px; }
+    .modal-field label {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      color: #004892;
+      margin-bottom: 6px;
+    }
+    .modal-select {
+      width: 100%;
+      padding: 9px 12px;
+      font-size: 13px;
+      border: 1.5px solid #c8d4e3;
+      border-radius: 7px;
+      background: #f8fafc;
+      color: #1a2a3a;
+      box-sizing: border-box;
+    }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+    .modal-cancel {
+      padding: 9px 20px; border-radius: 7px; font-size: 13px; font-weight: 700;
+      cursor: pointer; border: 1.5px solid #c8d4e3; background: #f8fafc; color: #5a6a7a;
+    }
+    .modal-send {
+      padding: 9px 22px; border-radius: 7px; font-size: 13px; font-weight: 700;
+      cursor: pointer; border: none; background: #004892; color: #fff; transition: background 0.15s;
+    }
+    .modal-send:hover { background: #003570; }
+    .modal-send:disabled { background: #8ab0d4; cursor: default; }
+    #carta-msg { font-size: 13px; font-weight: 600; margin-top: 10px; display: none; text-align: right; }
+    #carta-msg.ok  { color: #0a5038; display: block; }
+    #carta-msg.err { color: #842029; display: block; }
+
+    .correo-btn {
+      padding: 8px 18px;
+      border-radius: 7px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      border: 1.5px solid #c8d4e3;
+      background: #f8fafc;
+      color: #5a6a7a;
+      transition: all 0.15s;
+    }
+    .correo-btn.active {
+      background: #0a5038;
+      color: #fff;
+      border-color: #0a5038;
+    }
+
   </style>
 </head>
 <body>
@@ -353,6 +440,12 @@
       <a href="roster.html" class="nav-link">Roster</a>
       <a href="procesos.html" class="nav-link">Procesos</a>
       <a href="tareas.html" class="nav-link">Tareas</a>
+      <div class="nav-dropdown" id="nav-otros">
+        <button class="nav-dropdown-btn">Otros ▼</button>
+        <div class="nav-dropdown-menu">
+          <a href="tryout.html">Tryout</a>
+        </div>
+      </div>
     </nav>
   </header>
 
@@ -465,6 +558,7 @@
         <div class="staff-field">
           <label>Favorito</label>
           <button class="fav-btn" id="fav-btn">☆ Agregar a favoritos</button>
+          <button class="correo-btn" id="correo-btn">✉ Correo enviado</button>
         </div>
 
         <div class="staff-field">
@@ -514,11 +608,35 @@
 
       <div class="staff-actions">
         <button class="save-btn" id="save-btn">Guardar cambios</button>
+        <button class="carta-btn" id="carta-btn" style="display:none;">✉ Enviar carta</button>
         <span id="save-msg"></span>
       </div>
     </div>
 
   </main>
+
+  <!-- Modal: Enviar carta -->
+  <div class="modal-overlay" id="modal-carta">
+    <div class="modal-box">
+      <h3>✉ Enviar carta</h3>
+      <p class="modal-destinatario" id="modal-dest">—</p>
+      <div id="modal-aviso-semestre" style="display:none; background:#fff3cd; border:1.5px solid #ffc107; border-radius:7px; padding:10px 14px; margin-bottom:16px; font-size:13px; font-weight:600; color:#7d5a00;">
+        ⚠️ Enviar carta de invitación para 6to semestre
+      </div>
+
+      <div class="modal-field">
+        <label>Tipo de carta</label>
+        <select class="modal-select" id="modal-tipo-carta">
+          <option>Cargando...</option>
+        </select>
+      </div>
+      <div class="modal-actions">
+        <button class="modal-cancel" id="modal-cancelar">Cancelar</button>
+        <button class="modal-send" id="modal-enviar">Enviar carta ✉</button>
+      </div>
+      <div id="carta-msg"></div>
+    </div>
+  </div>
 
   <footer>
     <p>&copy; 2025 Reclutamiento MTY — Uso interno</p>
@@ -531,5 +649,15 @@
   </script>
   <script src="config.js"></script>
   <script src="perfil.js"></script>
+  <script>
+    document.getElementById("nav-otros").addEventListener("click", function(e) {
+      e.stopPropagation();
+      this.classList.toggle("open");
+    });
+    document.addEventListener("click", function() {
+      const d = document.getElementById("nav-otros");
+      if (d) d.classList.remove("open");
+    });
+  </script>
 </body>
 </html>

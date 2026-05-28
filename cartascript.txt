@@ -1,0 +1,66 @@
+const SHEET_ID = "1KjmOgg_oJlWizBNEBj-y6anQHyekPdoHdKWRDU-lIpQ";
+const SHEET_NAME = "Sheet1";
+
+function getCartas() {
+  const sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName(SHEET_NAME);
+  const rows = sheet.getDataRange().getValues();
+  const cartas = [];
+  for (let i = 1; i < rows.length; i++) {
+    cartas.push({
+      clave:          rows[i][0],
+      nombre_visible: rows[i][1],
+      archivo_id:     rows[i][2],
+      asunto:         rows[i][3],
+      cuerpo:         rows[i][4],
+    });
+  }
+  return cartas;
+}
+
+function doGet(e) {
+  const cartas = getCartas().map(c => ({
+    clave: c.clave,
+    nombre_visible: c.nombre_visible
+  }));
+  return ContentService
+    .createTextOutput(JSON.stringify(cartas))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function doPost(e) {
+  try {
+    const data = JSON.parse(e.postData.contents);
+    const { email, nombre, carta } = data;
+
+    const cartas = getCartas();
+    const selected = cartas.find(c => c.clave === carta);
+    if (!selected) throw new Error("Carta no encontrada: " + carta);
+
+    const archivo = DriveApp.getFileById(selected.archivo_id);
+    const pdf = archivo.getAs("application/pdf");
+
+    const cuerpo = selected.cuerpo.replace("{nombre}", nombre).replace(/\\n/g, "\n");
+
+    GmailApp.sendEmail(
+      email,
+      selected.asunto,
+      cuerpo,
+      {
+        attachments: [pdf],
+        cc: "zagalseb@gmail.com",
+        name: "Reclutamiento Borregos MTY"
+      }
+    );
+
+    return ContentService
+      .createTextOutput(JSON.stringify({ ok: true }))
+      .setMimeType(ContentService.MimeType.JSON);
+
+  } catch (err) {
+    return ContentService
+      .createTextOutput(JSON.stringify({ ok: false, error: err.message }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+https://forms.gle/HG9Lz8udS86SbvWr5

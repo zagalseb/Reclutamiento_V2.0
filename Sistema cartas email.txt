@@ -1,0 +1,292 @@
+====================================================
+  SISTEMA DE ENVÍO DE CARTAS POR CORREO
+  Reclutamiento Borregos MTY
+====================================================
+
+RESUMEN
+-------
+Desde el perfil de un prospecto, el staff puede enviar
+una carta oficial por correo con un PDF adjunto.
+Las cartas se administran desde Google Sheets sin tocar
+código. El sistema usa Google Apps Script como backend.
+Si el prospecto está en 6to semestre, aparece un aviso
+visible en el modal antes de enviar.
+
+
+====================================================
+  ARQUITECTURA
+====================================================
+
+perfil.html / perfil.js (frontend)
+        ↓
+Google Apps Script (Web App)
+        ↓
+Google Sheets (catálogo de cartas)
+        ↓
+Google Drive (PDFs de las cartas)
+        ↓
+Gmail (envío del correo)
+
+
+====================================================
+  CUENTAS Y ACCESOS
+====================================================
+
+Todo vive en la misma cuenta de Google:
+  zagalseb@gmail.com
+
+  - Google Drive: carpeta "Reclutamiento Borregos"
+    → Aquí se suben los PDFs de las cartas
+
+  - Google Sheets: "Cartas Reclutamiento"
+    ID: 1KjmOgg_oJlWizBNEBj-y6anQHyekPdoHdKWRDU-lIpQ
+    → Aquí se administran las cartas
+
+  - Google Apps Script: "Reclutamiento Cartas"
+    → El backend que conecta todo
+
+IMPORTANTE: Todo debe estar en la misma cuenta de Google
+para que el script tenga acceso a Drive y Sheets.
+
+
+====================================================
+  GOOGLE SHEETS - ESTRUCTURA
+====================================================
+
+Nombre del archivo: Cartas Reclutamiento
+Nombre de la hoja:  Sheet1
+
+Columnas:
+  A - clave          → identificador interno (ej: tryout)
+  B - nombre_visible → lo que ve el staff en el selector
+  C - archivo_id     → ID del PDF en Google Drive
+  D - asunto         → asunto del correo
+  E - cuerpo         → texto del correo
+
+Ejemplo de fila:
+  tryout | Invitación a Tryout | 1gj08eavYIVu7z... | Invitación a Tryout - Borregos MTY | Hola {nombre}, adjunto...
+
+NOTAS:
+  - {nombre} en el cuerpo se reemplaza automáticamente
+    por el nombre del prospecto al enviar
+  - \n en el cuerpo genera un salto de línea en el correo
+  - Para agregar una carta nueva: solo agregar una fila nueva
+  - La clave es el identificador interno que usa el código
+    (sin espacios ni caracteres especiales, ej: tryout, oferta)
+  - El nombre_visible es lo que ve el staff en el selector
+
+
+====================================================
+  GOOGLE DRIVE - ESTRUCTURA
+====================================================
+
+Carpeta: Reclutamiento Borregos (en zagalseb@gmail.com)
+
+  📄 Tryout Test.pdf
+  📄 (futuras cartas aquí)
+
+Para agregar una carta nueva:
+  1. Subir el PDF a esta carpeta
+  2. Click derecho → Share → Copy link
+  3. El ID está en la URL:
+     drive.google.com/file/d/ESTE_ES_EL_ID/view
+  4. Pegar el ID en la columna C del Sheets
+
+
+====================================================
+  GOOGLE APPS SCRIPT
+====================================================
+
+Nombre: Reclutamiento Cartas
+Cuenta: zagalseb@gmail.com
+URL actual: https://script.google.com/macros/s/AKfycbyec3BU1a3Rle481vV3tR94s4ShYlWMgp1Yq97P_idtkoqApKjlV5-pgY7vEXjLh-UK/exec
+
+CÓDIGO COMPLETO:
+----------------
+
+const SHEET_ID   = "1KjmOgg_oJlWizBNEBj-y6anQHyekPdoHdKWRDU-lIpQ";
+const SHEET_NAME = "Sheet1";
+
+function getCartas() {
+  const sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName(SHEET_NAME);
+  const rows  = sheet.getDataRange().getValues();
+  const cartas = [];
+  for (let i = 1; i < rows.length; i++) {
+    cartas.push({
+      clave:          rows[i][0],
+      nombre_visible: rows[i][1],
+      archivo_id:     rows[i][2],
+      asunto:         rows[i][3],
+      cuerpo:         rows[i][4],
+    });
+  }
+  return cartas;
+}
+
+function doGet(e) {
+  const cartas = getCartas().map(c => ({
+    clave:          c.clave,
+    nombre_visible: c.nombre_visible
+  }));
+  return ContentService
+    .createTextOutput(JSON.stringify(cartas))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function doPost(e) {
+  try {
+    const data   = JSON.parse(e.postData.contents);
+    const { email, nombre, carta } = data;
+
+    const cartas   = getCartas();
+    const selected = cartas.find(c => c.clave === carta);
+    if (!selected) throw new Error("Carta no encontrada: " + carta);
+
+    const archivo = DriveApp.getFileById(selected.archivo_id);
+    const pdf     = archivo.getAs("application/pdf");
+
+    const cuerpo = selected.cuerpo
+      .replace("{nombre}", nombre)
+      .replace(/\\n/g, "\n");
+
+    GmailApp.sendEmail(
+      email,
+      selected.asunto,
+      cuerpo,
+      {
+        attachments: [pdf],
+        cc:   "zagalseb@gmail.com",
+        name: "Reclutamiento Borregos MTY"
+      }
+    );
+
+    return ContentService
+      .createTextOutput(JSON.stringify({ ok: true }))
+      .setMimeType(ContentService.MimeType.JSON);
+
+  } catch (err) {
+    return ContentService
+      .createTextOutput(JSON.stringify({ ok: false, error: err.message }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+DEPLOY:
+  - Tipo: Web App
+  - Ejecutar como: zagalseb@gmail.com
+  - Acceso: Anyone
+  - Siempre hacer New deployment al cambiar el código
+  - La URL cambia con cada nuevo deployment —
+    actualizar APPS_SCRIPT_URL en perfil.js
+
+
+====================================================
+  PERFIL.JS - CAMBIOS RELEVANTES
+====================================================
+
+1. URL del Apps Script:
+   const APPS_SCRIPT_URL = "https://script.google.com/...";
+
+2. Variables de estado (agregar junto a otras variables let):
+   let jugadorEmail    = "";
+   let jugadorNombre   = "";
+   let jugadorSemestre = "";
+
+3. Función para cargar cartas dinámicamente:
+   async function cargarCartas() {
+     const res    = await fetch(APPS_SCRIPT_URL);
+     const cartas = await res.json();
+     const select = $("modal-tipo-carta");
+     select.innerHTML = "";
+     cartas.forEach(c => {
+       const opt       = document.createElement("option");
+       opt.value       = c.clave;
+       opt.textContent = c.nombre_visible;
+       select.appendChild(opt);
+     });
+   }
+
+4. En el init, después de renderizar el jugador:
+   jugadorEmail    = jugador.email          || "";
+   jugadorNombre   = jugador.nombre         || "";
+   jugadorSemestre = jugador.semestre_prepa || "";
+   cargarCartas();
+
+5. Al abrir el modal, mostrar aviso si es 6to semestre:
+   $("modal-dest").textContent = `Para: ${jugadorNombre} — ${jugadorEmail}`;
+   const avisoEl = $("modal-aviso-semestre");
+   if (jugadorSemestre === "6to") {
+     avisoEl.style.display = "block";
+   } else {
+     avisoEl.style.display = "none";
+   }
+
+6. Lógica del modal: abre modal, envía POST al script,
+   muestra confirmación o error, cierra al éxito.
+
+
+====================================================
+  PERFIL.HTML - CAMBIOS RELEVANTES
+====================================================
+
+1. Botón junto a "Guardar cambios":
+   <button class="carta-btn" id="carta-btn">✉ Enviar carta</button>
+
+2. Modal antes del <footer>:
+   <div class="modal-overlay" id="modal-carta">
+     <div class="modal-box">
+       <h3>✉ Enviar carta</h3>
+       <p class="modal-destinatario" id="modal-dest">—</p>
+
+       <!-- Aviso 6to semestre — solo visible si aplica -->
+       <div id="modal-aviso-semestre" style="display:none;
+         background:#fff3cd; border:1.5px solid #ffc107;
+         border-radius:7px; padding:10px 14px;
+         margin-bottom:16px; font-size:13px;
+         font-weight:600; color:#7d5a00;">
+         ⚠️ Enviar carta de invitación para 6to semestre
+       </div>
+
+       <div class="modal-field">
+         <label>Tipo de carta</label>
+         <select class="modal-select" id="modal-tipo-carta">
+           <option>Cargando...</option>
+         </select>
+       </div>
+       <div class="modal-actions">
+         <button class="modal-cancel" id="modal-cancelar">Cancelar</button>
+         <button class="modal-send"   id="modal-enviar">Enviar carta ✉</button>
+       </div>
+       <div id="carta-msg"></div>
+     </div>
+   </div>
+
+
+====================================================
+  CÓMO REPLICAR EN OTRO EQUIPO/CORREO
+====================================================
+
+1. Crear carpeta en Drive del nuevo correo
+   → Subir los PDFs ahí
+
+2. Crear Google Sheets con la misma estructura
+   → Sheet1 con columnas: clave, nombre_visible,
+     archivo_id, asunto, cuerpo
+   → Llenar con las cartas del equipo
+
+3. Crear Apps Script desde el nuevo correo
+   → Pegar el código completo de arriba
+   → Cambiar SHEET_ID por el ID del nuevo Sheets
+   → Cambiar el cc en GmailApp.sendEmail al correo del equipo
+   → Cambiar name: "Nombre del equipo"
+   → Autorizar permisos corriendo getCartas manualmente
+     (Run → getCartas → Review permissions → Allow)
+   → New deployment → copiar URL
+
+4. En perfil.js:
+   → Actualizar APPS_SCRIPT_URL con la nueva URL
+
+5. Listo — el resto del código no cambia.
+
+
+====================================================

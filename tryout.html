@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <title>Tryout — Reclutamiento MTY</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+
+    /* ── Page ── */
+    .tryout-main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 24px 20px 40px;
+    }
+
+    /* ── Card ── */
+    .tryout-card {
+      background: #fff;
+      border-radius: 10px;
+      padding: 20px 24px;
+      box-shadow: 0 2px 12px rgba(0,72,146,0.08);
+    }
+
+    .tryout-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #e0e8f0;
+    }
+
+    #t-titulo {
+      color: #004892;
+      font-weight: 700;
+      margin: 0;
+      font-size: 18px;
+    }
+
+    #t-total {
+      font-size: 13px;
+      color: #5a6a7a;
+      font-weight: 700;
+    }
+
+    /* ── Table ── */
+    .tryout-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    .tryout-table th {
+      background: #004892;
+      color: #fff;
+      padding: 10px 12px;
+      text-align: left;
+      font-weight: 700;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      white-space: nowrap;
+    }
+
+    .tryout-table th:first-child { border-radius: 6px 0 0 0; }
+    .tryout-table th:last-child  { border-radius: 0 6px 0 0; }
+
+    .tryout-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #edf2f7;
+      color: #1a2a3a;
+      vertical-align: middle;
+    }
+
+    .tryout-table tbody tr:last-child td { border-bottom: none; }
+    .tryout-table tbody tr:hover { background: #f8fafc; }
+
+    .prospecto-link {
+      color: #004892;
+      font-weight: 700;
+      text-decoration: none;
+    }
+    .prospecto-link:hover { text-decoration: underline; color: #004892; }
+
+    /* ── Confirmado buttons ── */
+    .confirm-btns { display: flex; gap: 4px; }
+
+    .confirm-btn {
+      padding: 4px 10px;
+      font-size: 11px;
+      font-weight: 700;
+      border: 1.5px solid #c8d4e3;
+      border-radius: 5px;
+      background: #f8fafc;
+      color: #5a6a7a;
+      cursor: pointer;
+      transition: all 0.12s;
+      white-space: nowrap;
+    }
+    .confirm-btn:hover { border-color: #004892; color: #004892; }
+
+    .confirm-btn.btn-si.active   { background: #d1e7dd; border-color: #0a5038; color: #0a5038; }
+    .confirm-btn.btn-no.active   { background: #f8d7da; border-color: #842029; color: #842029; }
+    .confirm-btn.btn-pend.active { background: #fff3cd; border-color: #856404; color: #856404; }
+
+    /* ── Row menu ── */
+    .menu-cell { white-space: nowrap; }
+
+    .row-menu-btn {
+      padding: 4px 10px;
+      font-size: 18px;
+      font-weight: 700;
+      line-height: 1;
+      background: #f8fafc;
+      border: 1.5px solid #c8d4e3;
+      border-radius: 6px;
+      cursor: pointer;
+      color: #5a6a7a;
+      transition: all 0.12s;
+    }
+    .row-menu-btn:hover,
+    .row-menu-btn.open { background: #eef4fb; border-color: #004892; color: #004892; }
+
+    /* ── Row panel ── */
+    .panel-row { display: none; }
+    .panel-row.open { display: table-row; }
+
+    .panel-row td {
+      padding: 0;
+      border-bottom: 2px solid #004892;
+    }
+
+    .row-panel {
+      background: #f8fafc;
+      border-top: 1px solid #c8d4e3;
+      padding: 20px 24px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .panel-section {
+      margin-bottom: 14px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid #edf2f7;
+    }
+    .panel-section:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+
+    .panel-label {
+      display: block;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #7a8a9a;
+      margin-bottom: 6px;
+    }
+
+    .panel-textarea {
+      width: 100%;
+      box-sizing: border-box;
+      font-size: 12px;
+      font-family: inherit;
+      border: 1.5px solid #c8d4e3;
+      border-radius: 6px;
+      padding: 7px 9px;
+      background: #f8fafc;
+      color: #1a2a3a;
+      resize: vertical;
+      min-height: 70px;
+    }
+    .panel-textarea:focus {
+      border-color: #004892;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(0,72,146,0.10);
+    }
+
+    .panel-notas-footer { display: flex; justify-content: flex-end; margin-top: 6px; }
+
+    .panel-save-notas {
+      padding: 5px 14px;
+      font-size: 11px;
+      font-weight: 700;
+      background: #004892;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.12s;
+    }
+    .panel-save-notas:hover    { background: #003570; }
+    .panel-save-notas:disabled { background: #8ab0d4; cursor: default; }
+
+    .panel-select {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 7px 10px;
+      font-size: 12px;
+      border: 1.5px solid #c8d4e3;
+      border-radius: 6px;
+      background: #f8fafc;
+      color: #1a2a3a;
+    }
+    .panel-select:focus {
+      border-color: #004892;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(0,72,146,0.10);
+    }
+
+    .panel-fav-btn {
+      width: 100%;
+      padding: 7px 10px;
+      font-size: 12px;
+      font-weight: 700;
+      border: 1.5px solid #c8d4e3;
+      border-radius: 6px;
+      background: #f8fafc;
+      color: #5a6a7a;
+      cursor: pointer;
+      transition: all 0.12s;
+      text-align: left;
+    }
+    .panel-fav-btn.fav-active { background: #fff3cd; border-color: #ffc107; color: #856404; }
+
+    .prioridad-btns { display: flex; gap: 6px; }
+    .prio-btn {
+      flex: 1;
+      padding: 6px;
+      font-size: 13px;
+      font-weight: 700;
+      border: 1.5px solid #c8d4e3;
+      border-radius: 6px;
+      background: #f8fafc;
+      color: #5a6a7a;
+      cursor: pointer;
+      transition: all 0.12s;
+    }
+    .prio-btn.prio-active { background: #004892; border-color: #004892; color: #fff; }
+
+    .panel-disabled { opacity: 0.45; pointer-events: none; }
+
+    /* ── Filter bar ── */
+    .filter-bar {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .filter-pill {
+      padding: 5px 16px;
+      font-size: 12px;
+      font-weight: 700;
+      border: 1.5px solid #c8d4e3;
+      border-radius: 20px;
+      background: #f8fafc;
+      color: #5a6a7a;
+      cursor: pointer;
+      transition: all 0.12s;
+    }
+
+    .filter-pill:hover { border-color: #004892; color: #004892; }
+    .filter-pill.active { background: #004892; border-color: #004892; color: #fff; }
+    .coming-soon { font-size: 12px; color: #7a8a9a; font-style: italic; margin: 0; }
+
+    .panel-eliminar {
+      width: 100%;
+      padding: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      background: #f8d7da;
+      border: 1.5px solid #842029;
+      border-radius: 6px;
+      color: #842029;
+      cursor: pointer;
+      transition: all 0.12s;
+    }
+    .panel-eliminar:hover { background: #842029; color: #fff; }
+
+    /* ── Loading / Empty ── */
+    .loading-state,
+    .empty-state {
+      text-align: center;
+      padding: 48px 24px;
+      color: #7a8a9a;
+    }
+    .loading-state .spinner {
+      width: 36px; height: 36px;
+      border: 3px solid #e0e8f0;
+      border-top-color: #004892;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin: 0 auto 14px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .empty-state .empty-icon { font-size: 42px; margin-bottom: 12px; }
+    .empty-state h3 { color: #004892; margin: 0 0 6px; font-size: 16px; }
+
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-top">
+      <h1>Reclutamiento</h1>
+      <p id="bienvenida"></p>
+      <button id="cerrar-sesion">Cerrar sesión</button>
+    </div>
+    <nav>
+      <a href="index.html" class="nav-link">Inicio</a>
+      <a href="prospectos.html" class="nav-link">Prospectos</a>
+      <a href="bigboard.html" class="nav-link">Big Board</a>
+      <a href="roster.html" class="nav-link">Roster</a>
+      <a href="procesos.html" class="nav-link">Procesos</a>
+      <a href="tareas.html" class="nav-link">Tareas</a>
+      <div class="nav-dropdown" id="nav-otros">
+        <button class="nav-dropdown-btn active">Otros ▼</button>
+        <div class="nav-dropdown-menu">
+          <a href="tryout.html" class="active">Tryout</a>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <main class="tryout-main">
+    <div class="tryout-card">
+
+      <div class="tryout-header">
+        <h2 id="t-titulo">Tryout / Visita</h2>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span id="t-total"></span>
+          <button id="btn-export-pdf" onclick="exportarPDF()" style="padding:5px 14px;font-size:12px;font-weight:700;background:#f8fafc;border:1.5px solid #c8d4e3;border-radius:6px;color:#5a6a7a;cursor:pointer;transition:all 0.12s;" onmouseover="this.style.borderColor='#004892';this.style.color='#004892'" onmouseout="this.style.borderColor='#c8d4e3';this.style.color='#5a6a7a'">⬇ Exportar PDF</button>
+        </div>
+      </div>
+
+      <div class="filter-bar">
+        <button class="filter-pill active" data-filtro="todos">Todos</button>
+        <button class="filter-pill" data-filtro="si">Sí</button>
+        <button class="filter-pill" data-filtro="no">No</button>
+        <button class="filter-pill" data-filtro="pendiente">Pendiente</button>
+      </div>
+
+      <div id="t-wrap">
+
+        <div class="loading-state" id="t-loading">
+          <div class="spinner"></div>
+          <p>Cargando prospectos...</p>
+        </div>
+
+        <table class="tryout-table" id="t-table" style="display:none;">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Nombre</th>
+              <th>Estado</th>
+              <th>Posición</th>
+              <th>Confirmado</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="t-tbody"></tbody>
+        </table>
+
+        <div class="empty-state" id="t-empty" style="display:none;">
+          <div class="empty-icon">🏈</div>
+          <h3>Sin prospectos en Tryout</h3>
+          <p>No hay prospectos con etapa "Tryout / Visita" actualmente.</p>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 Reclutamiento MTY — Uso interno</p>
+  </footer>
+
+  <script>
+    const u = localStorage.getItem("usuarioActual") || "";
+    const bv = document.getElementById("bienvenida");
+    if (bv && u) bv.textContent = u;
+  </script>
+  <script src="config.js"></script>
+  <script src="tryout.js"></script>
+  <script>
+    document.getElementById("nav-otros").addEventListener("click", function(e) {
+      e.stopPropagation();
+      this.classList.toggle("open");
+    });
+    document.addEventListener("click", function() {
+      const d = document.getElementById("nav-otros");
+      if (d) d.classList.remove("open");
+    });
+  </script>
+</body>
+</html>

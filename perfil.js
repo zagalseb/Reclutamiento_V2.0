@@ -20,7 +20,11 @@
   let jugadorId    = null;
   let procesoId    = null;
   let calificacion = 0;  // current star value (1-5)
-  let esFavorito   = false;
+  let esFavorito    = false;
+  let correoEnviado = false;
+  let jugadorEmail    = "";
+  let jugadorNombre   = "";
+  let jugadorSemestre = "";
 
   // ── DOM shortcuts ────────────────────────────────────
   const $ = id => document.getElementById(id);
@@ -168,9 +172,9 @@
 
     // Sección 4 — Atléticos
     text("d-posicion",  j.posicion);
-    text("d-altura",    j.altura ? `${j.altura} m`  : null);
+    text("d-altura",    j.altura ? `${parseFloat(j.altura).toFixed(2)} m`  : null);
     text("d-peso",      j.peso   ? `${j.peso} kg`   : null);
-    text("d-40yds",     j.cuarenta_yardas ? `${j.cuarenta_yardas} s` : null);
+    text("d-40yds",     j.cuarenta_yardas ? `${parseFloat(j.cuarenta_yardas).toFixed(2)} s` : null);
     text("d-lesiones",  j.lesiones);
     text("d-equipo",    j.nombre_equipo);
 
@@ -201,7 +205,9 @@
   // ── Render staff panel (Sección 6) ──────────────────
   function renderStaff(j) {
     calificacion = Math.min(5, Math.max(0, Math.round(j.calificacion || 0)));
-    esFavorito   = !!j.favorito;
+    esFavorito    = !!j.favorito;
+    correoEnviado = !!j.procesos?.[0]?.correo_enviado;
+    procesoId     = j.procesos?.[0]?.id || null;
 
     updateStarUI(calificacion);
     updateFavBtn(esFavorito);
@@ -235,6 +241,32 @@
     btn.textContent = active ? "★ En favoritos" : "☆ Agregar a favoritos";
     btn.classList.toggle("active", active);
   }
+
+  function renderCorreoBtn() {
+    const btn = $("correo-btn");
+    btn.textContent = correoEnviado ? "✉ Correo enviado ✓" : "✉ Correo enviado";
+    btn.classList.toggle("active", correoEnviado);
+  }
+
+  $("correo-btn").addEventListener("click", async () => {
+    correoEnviado = !correoEnviado;
+    renderCorreoBtn();
+    if (procesoId) {
+      await fetch(`${SUPABASE_URL}/rest/v1/procesos?id=eq.${procesoId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": SUPABASE_KEY,
+          "Authorization": `Bearer ${SUPABASE_KEY}`,
+          "Prefer": "return=minimal"
+        },
+        body: JSON.stringify({
+          correo_enviado: correoEnviado,
+          correo_enviado_fecha: correoEnviado ? new Date().toISOString() : null
+        })
+      });
+    }
+  });
 
   $("fav-btn").addEventListener("click", () => {
     esFavorito = !esFavorito;
@@ -289,6 +321,88 @@
     setTimeout(() => { msg.style.display = "none"; }, 3000);
   });
 
+  // ── Enviar carta ─────────────────────────────────────
+  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzgEbSMTtiREQ3-maEoWHx-s-li16b3aHNJtbLJc_FbZ43h_5_-cK_tTdneiU4S9P5S/exec";
+
+  async function cargarCartas() {
+    try {
+      const res = await fetch(APPS_SCRIPT_URL);
+      const cartas = await res.json();
+      const select = $("modal-tipo-carta");
+      select.innerHTML = "";
+      cartas.forEach(c => {
+        const opt = document.createElement("option");
+        opt.value = c.clave;
+        opt.textContent = c.nombre_visible;
+        select.appendChild(opt);
+      });
+    } catch (err) {
+      console.error("Error cargando cartas:", err);
+    }
+  }
+
+  $("carta-btn").addEventListener("click", () => {
+    if (!jugadorEmail) {
+      alert("Este prospecto no tiene correo registrado.");
+      return;
+    }
+    $("modal-dest").textContent = `Para: ${jugadorNombre} — ${jugadorEmail}`;
+    const avisoEl = $("modal-aviso-semestre");
+    if (jugadorSemestre === "6to") {
+      avisoEl.style.display = "block";
+    } else {
+      avisoEl.style.display = "none";
+    }
+    $("carta-msg").className = "";
+    $("carta-msg").textContent = "";
+    $("modal-carta").classList.add("open");
+  });
+
+  $("modal-cancelar").addEventListener("click", () => {
+    $("modal-carta").classList.remove("open");
+  });
+
+  $("modal-carta").addEventListener("click", (e) => {
+    if (e.target === $("modal-carta")) $("modal-carta").classList.remove("open");
+  });
+
+  $("modal-enviar").addEventListener("click", async () => {
+    const btn   = $("modal-enviar");
+    const msg   = $("carta-msg");
+    const carta = $("modal-tipo-carta").value;
+
+    btn.disabled = true;
+    btn.textContent = "Enviando...";
+    msg.className = "";
+    msg.textContent = "";
+
+    try {
+      const res = await fetch(APPS_SCRIPT_URL, {
+        method: "POST",
+        body: JSON.stringify({
+          email:  jugadorEmail,
+          nombre: jugadorNombre,
+          carta:  carta,
+        }),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        msg.textContent = "✓ Carta enviada correctamente";
+        msg.className   = "ok";
+        setTimeout(() => $("modal-carta").classList.remove("open"), 2000);
+      } else {
+        msg.textContent = "✗ Error: " + (data.error || "intenta de nuevo");
+        msg.className   = "err";
+      }
+    } catch (err) {
+      msg.textContent = "✗ Error de conexión: " + err.message;
+      msg.className   = "err";
+    }
+
+    btn.disabled = false;
+    btn.textContent = "Enviar carta ✉";
+  });
+
   // ── Init ─────────────────────────────────────────────
   (async function init() {
     const params = new URLSearchParams(window.location.search);
@@ -316,6 +430,13 @@
     renderInfo(jugador);
     renderHighlights(jugador);
     renderStaff(jugador);
+    renderCorreoBtn();
+
+    // Guardar para el modal de carta
+    jugadorEmail    = jugador.email         || "";
+    jugadorNombre   = jugador.nombre        || "";
+    jugadorSemestre = jugador.semestre_prepa || "";
+    cargarCartas();
 
     try {
       const proceso = await fetchProcesoPerfil(jugadorId);

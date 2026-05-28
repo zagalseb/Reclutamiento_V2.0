@@ -62,7 +62,7 @@ function renderTabla(lista) {
     const esHoy     = fechaReg === hoy;
     const estatura  = j.estatura   ? `${j.estatura} m`  : "—";
     const peso      = j.peso       ? `${j.peso} kg`     : "—";
-    const cuarenta  = j.cuarenta_yardas ? `${j.cuarenta_yardas}s` : "—";
+    const cuarenta  = j.cuarenta_yardas ? `${parseFloat(j.cuarenta_yardas).toFixed(2)}s` : "—";
 
     return `
       <tr>
