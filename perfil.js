@@ -206,8 +206,6 @@
   function renderStaff(j) {
     calificacion = Math.min(5, Math.max(0, Math.round(j.calificacion || 0)));
     esFavorito    = !!j.favorito;
-    correoEnviado = !!j.procesos?.[0]?.correo_enviado;
-    procesoId     = j.procesos?.[0]?.id || null;
 
     updateStarUI(calificacion);
     updateFavBtn(esFavorito);
@@ -430,7 +428,6 @@
     renderInfo(jugador);
     renderHighlights(jugador);
     renderStaff(jugador);
-    renderCorreoBtn();
 
     // Guardar para el modal de carta
     jugadorEmail    = jugador.email         || "";
@@ -442,6 +439,8 @@
       const proceso = await fetchProcesoPerfil(jugadorId);
       if (proceso) {
         procesoId = proceso.id;
+        correoEnviado = !!proceso.correo_enviado;
+        renderCorreoBtn();
         $("edit-crm").value       = proceso.etapa           || "";
         $("edit-decision").value  = proceso.decision        || "";
         $("edit-prioridad").value = proceso.prioridad       || "";
