@@ -74,7 +74,9 @@
   // ── Build row HTML ────────────────────────────────────
   function buildRow(p, n) {
     const j = Array.isArray(p.jugadores) ? (p.jugadores[0] || {}) : (p.jugadores || {});
-    const confirmado = (p.confirmado_tryout || "Pendiente").toLowerCase();    const prioridad  = p.prioridad || "";
+    const confirmado   = (p.confirmado_tryout || "Pendiente").toLowerCase();
+    const prioridad    = p.prioridad || "";
+    const correoEnv    = !!p.correo_enviado;
     const favorito   = !!j.favorito;
 
     const etapasOpts = window.CONFIG.ETAPAS.map(e =>
@@ -91,6 +93,9 @@
         <td><a class="prospecto-link" href="perfil.html?id=${esc(j.id)}">${esc(j.nombre || "—")}</a></td>
         <td>${esc(j.estado || "—")}</td>
         <td>${esc(j.posicion || "—")}</td>
+        <td><span class="correo-badge ${correoEnv ? 'enviado' : ''}">
+            ${correoEnv ? '✉ Enviado' : '—'}
+          </span></td>
         <td>
           <div class="confirm-btns">
             <button class="confirm-btn btn-si   ${confirmado === "si"        ? "active" : ""}" data-val="si">Sí</button>

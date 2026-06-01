@@ -301,6 +301,23 @@
     .empty-state .empty-icon { font-size: 42px; margin-bottom: 12px; }
     .empty-state h3 { color: #004892; margin: 0 0 6px; font-size: 16px; }
 
+    .correo-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      font-size: 11px;
+      font-weight: 700;
+      border-radius: 20px;
+      background: #f8fafc;
+      border: 1.5px solid #c8d4e3;
+      color: #5a6a7a;
+      white-space: nowrap;
+    }
+    .correo-badge.enviado {
+      background: #d1e7dd;
+      border-color: #0a5038;
+      color: #0a5038;
+    }
+
   </style>
 </head>
 <body>
@@ -318,12 +335,7 @@
       <a href="roster.html" class="nav-link">Roster</a>
       <a href="procesos.html" class="nav-link">Procesos</a>
       <a href="tareas.html" class="nav-link">Tareas</a>
-      <div class="nav-dropdown" id="nav-otros">
-        <button class="nav-dropdown-btn active">Otros ▼</button>
-        <div class="nav-dropdown-menu">
-          <a href="tryout.html" class="active">Tryout</a>
-        </div>
-      </div>
+      <a href="tryout.html" class="nav-link active">Tryout</a>
     </nav>
   </header>
 
@@ -359,6 +371,7 @@
               <th>Nombre</th>
               <th>Estado</th>
               <th>Posición</th>
+              <th>Correo</th>
               <th>Confirmado</th>
               <th></th>
             </tr>

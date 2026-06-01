@@ -384,6 +384,7 @@
       <a href="roster.html" class="nav-link">Roster</a>
       <a href="procesos.html" class="nav-link">Procesos</a>
       <a href="tareas.html" class="nav-link active">Tareas</a>
+      <a href="tryout.html" class="nav-link">Tryout</a>
     </nav>
   </header>
 
@@ -561,5 +562,15 @@
   </script>
   <script src="config.js"></script>
   <script src="tareas.js"></script>
+  <script>
+    document.getElementById("nav-otros").addEventListener("click", function(e) {
+      e.stopPropagation();
+      this.classList.toggle("open");
+    });
+    document.addEventListener("click", function() {
+      const d = document.getElementById("nav-otros");
+      if (d) d.classList.remove("open");
+    });
+  </script>
 </body>
 </html>
