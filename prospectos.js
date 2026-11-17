@@ -286,6 +286,18 @@
     applyFilters();
   });
 
+  // ── Año de nacimiento: opciones según los datos ────
+  function llenarAnios() {
+    const anios = [...new Set(
+      allJugadores
+        .map(j => (j.fecha_nacimiento || "").slice(0, 4))
+        .filter(a => /^\d{4}$/.test(a))
+    )].sort();
+
+    fAnio.innerHTML = `<option value="">Todos</option>` +
+      anios.map(a => `<option>${a}</option>`).join("");
+  }
+
   // ── Filter persistence ─────────────────────────────
   function guardarFiltros() {
     const estado = {
@@ -424,6 +436,7 @@
     try {
       allJugadores = await fetchAll();
       loading.style.display = "none";
+      llenarAnios();
       restaurarFiltros();
       applyFilters();
     } catch (err) {
